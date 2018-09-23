@@ -20,12 +20,12 @@
 
 #include "tcc.h"
 #if ONE_SOURCE
-# include "libtcc.c"
+#include "libtcc.c"
 #endif
 #include "tcctools.c"
 
 static const char help[] =
-    "Tiny C Compiler "TCC_VERSION" - Copyright (C) 2001-2006 Fabrice Bellard\n"
+    "Tiny C Compiler (Quake 3 Edition) " TCC_VERSION " - Copyright (C) 2001-2006 Fabrice Bellard\n"
     "Usage: tcc [options...] [-o outfile] [-c] infile(s)...\n"
     "       tcc [options...] -run infile [arguments...]\n"
     "General options:\n"
@@ -70,14 +70,10 @@ static const char help[] =
     "  -MF file    specify dependency file name\n"
     "  -m32/64     defer to i386/x86_64 cross compiler\n"
     "Tools:\n"
-    "  create library  : tcc -ar [rcsv] lib.a files\n"
-#ifdef TCC_TARGET_PE
-    "  create def file : tcc -impdef lib.dll [-v] [-o lib.def]\n"
-#endif
-    ;
+    "  create library  : tcc -ar [rcsv] lib.a files\n";
 
 static const char help2[] =
-    "Tiny C Compiler "TCC_VERSION" - More Options\n"
+    "Tiny C Compiler " TCC_VERSION " - More Options\n"
     "Special options:\n"
     "  -P -P1                        with -E: no/alternative #line output\n"
     "  -dD -dM                       with -E: output #define directives\n"
@@ -120,15 +116,6 @@ static const char help2[] =
     "  -export-dynamic               same as -rdynamic\n"
     "  -image-base= -Ttext=          set base address of executable\n"
     "  -section-alignment=           set section alignment in executable\n"
-#ifdef TCC_TARGET_PE
-    "  -file-alignment=              set PE file alignment\n"
-    "  -stack=                       set PE stack reserve\n"
-    "  -large-address-aware          set related PE option\n"
-    "  -subsystem=[console/windows]  set PE subsystem\n"
-    "  -oformat=[pe-* binary]        set executable output format\n"
-    "Predefined macros:\n"
-    "  tcc -E -dM - < nul\n"
-#else
     "  -rpath=                       set dynamic library search path\n"
     "  -enable-new-dtags             set DT_RUNPATH instead of DT_RPATH\n"
     "  -soname=                      set DT_SONAME elf tag\n"
@@ -137,43 +124,40 @@ static const char help2[] =
     "  -init= -fini= -as-needed -O   (ignored)\n"
     "Predefined macros:\n"
     "  tcc -E -dM - < /dev/null\n"
-#endif
-    "See also the manual for more details.\n"
-    ;
+    "See also the manual for more details.\n";
 
 static const char version[] =
-    "tcc version "TCC_VERSION" ("
+    "tcc version " TCC_VERSION " ("
 #ifdef TCC_TARGET_I386
-        "i386"
+    "i386"
 #elif defined TCC_TARGET_X86_64
-        "x86_64"
+    "x86_64"
 #elif defined TCC_TARGET_C67
-        "C67"
+    "C67"
 #elif defined TCC_TARGET_ARM
-        "ARM"
+    "ARM"
 #elif defined TCC_TARGET_ARM64
-        "AArch64"
+    "AArch64"
 #endif
 #ifdef TCC_ARM_HARDFLOAT
-        " Hard Float"
+    " Hard Float"
 #endif
 #ifdef TCC_TARGET_PE
-        " Windows"
+    " Windows"
 #elif defined(TCC_TARGET_MACHO)
-        " Darwin"
+    " Darwin"
 #elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
-        " FreeBSD"
+    " FreeBSD"
 #else
-        " Linux"
+    " Linux"
 #endif
-    ")\n"
-    ;
+    ")\n";
 
 static void print_dirs(const char *msg, char **paths, int nb_paths)
 {
     int i;
     printf("%s:\n%s", msg, nb_paths ? "" : "  -\n");
-    for(i = 0; i < nb_paths; i++)
+    for (i = 0; i < nb_paths; i++)
         printf("  %s\n", paths[i]);
 }
 
@@ -184,28 +168,31 @@ static void print_search_dirs(TCCState *s)
     print_dirs("include", s->sysinclude_paths, s->nb_sysinclude_paths);
     print_dirs("libraries", s->library_paths, s->nb_library_paths);
 #ifdef TCC_TARGET_PE
-    printf("libtcc1:\n  %s/lib/"TCC_LIBTCC1"\n", s->tcc_lib_path);
+    printf("libtcc1:\n  %s/lib/" TCC_LIBTCC1 "\n", s->tcc_lib_path);
 #else
-    printf("libtcc1:\n  %s/"TCC_LIBTCC1"\n", s->tcc_lib_path);
+    printf("libtcc1:\n  %s/" TCC_LIBTCC1 "\n", s->tcc_lib_path);
     print_dirs("crt", s->crt_paths, s->nb_crt_paths);
-    printf("elfinterp:\n  %s\n",  DEFAULT_ELFINTERP(s));
+    printf("elfinterp:\n  %s\n", DEFAULT_ELFINTERP(s));
 #endif
 }
 
 static void set_environment(TCCState *s)
 {
-    char * path;
+    char *path;
 
     path = getenv("C_INCLUDE_PATH");
-    if(path != NULL) {
+    if (path != NULL)
+    {
         tcc_add_sysinclude_path(s, path);
     }
     path = getenv("CPATH");
-    if(path != NULL) {
+    if (path != NULL)
+    {
         tcc_add_include_path(s, path);
     }
     path = getenv("LIBRARY_PATH");
-    if(path != NULL) {
+    if (path != NULL)
+    {
         tcc_add_library_path(s, path);
     }
 }
@@ -223,12 +210,11 @@ static char *default_outputfile(TCCState *s, const char *first_file)
 #ifdef TCC_TARGET_PE
     if (s->output_type == TCC_OUTPUT_DLL)
         strcpy(ext, ".dll");
-    else
-    if (s->output_type == TCC_OUTPUT_EXE)
+    else if (s->output_type == TCC_OUTPUT_EXE)
         strcpy(ext, ".exe");
     else
 #endif
-    if (s->output_type == TCC_OUTPUT_OBJ && !s->option_r && *ext)
+        if (s->output_type == TCC_OUTPUT_OBJ && !s->option_r && *ext)
         strcpy(ext, ".o");
     else
         strcpy(buf, "a.out");
@@ -242,7 +228,7 @@ static unsigned getclock_ms(void)
 #else
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    return tv.tv_sec*1000 + (tv.tv_usec+500)/1000;
+    return tv.tv_sec * 1000 + (tv.tv_usec + 500) / 1000;
 #endif
 }
 
@@ -250,9 +236,9 @@ int main(int argc0, char **argv0)
 {
     TCCState *s;
     int ret, opt, n = 0, t = 0;
-    unsigned start_time = 0;
     const char *first_file;
-    int argc; char **argv;
+    int argc;
+    char **argv;
     FILE *ppfp = stdout;
 
 redo:
@@ -260,24 +246,18 @@ redo:
     s = tcc_new();
     opt = tcc_parse_args(s, &argc, &argv, 1);
 
-    if ((n | t) == 0) {
+    if ((n | t) == 0)
+    {
         if (opt == OPT_HELP)
             return printf(help), 1;
         if (opt == OPT_HELP2)
             return printf(help2), 1;
-        if (opt == OPT_M32 || opt == OPT_M64)
-            tcc_tool_cross(s, argv, opt); /* never returns */
         if (s->verbose)
             printf(version);
-        if (opt == OPT_AR)
-            return tcc_tool_ar(s, argc, argv);
-#ifdef TCC_TARGET_PE
-        if (opt == OPT_IMPDEF)
-            return tcc_tool_impdef(s, argc, argv);
-#endif
         if (opt == OPT_V)
             return 0;
-        if (opt == OPT_PRINT_DIRS) {
+        if (opt == OPT_PRINT_DIRS)
+        {
             /* initialize search dirs */
             set_environment(s);
             tcc_set_output_type(s, TCC_OUTPUT_MEMORY);
@@ -289,26 +269,22 @@ redo:
         if (n == 0)
             tcc_error("no input files\n");
 
-        if (s->output_type == TCC_OUTPUT_PREPROCESS) {
-            if (s->outfile) {
+        if (s->output_type == TCC_OUTPUT_PREPROCESS)
+        {
+            if (s->outfile)
+            {
                 ppfp = fopen(s->outfile, "w");
                 if (!ppfp)
                     tcc_error("could not write '%s'", s->outfile);
             }
-        } else if (s->output_type == TCC_OUTPUT_OBJ && !s->option_r) {
+        }
+        else if (s->output_type == TCC_OUTPUT_OBJ && !s->option_r)
+        {
             if (s->nb_libraries)
                 tcc_error("cannot specify libraries with -c");
             if (n > 1 && s->outfile)
                 tcc_error("cannot specify output file with -c many files");
-        } else {
-            if (s->option_pthread) {
-                tcc_set_options(s, "-lpthread");
-		n = s->nb_files;
-	    }
         }
-
-        if (s->do_bench)
-            start_time = getclock_ms();
     }
 
     set_environment(s);
@@ -317,18 +293,21 @@ redo:
     tcc_set_output_type(s, s->output_type);
     s->ppfp = ppfp;
 
-    if ((s->output_type == TCC_OUTPUT_MEMORY
-      || s->output_type == TCC_OUTPUT_PREPROCESS) && (s->dflag & 16))
+    if ((s->output_type == TCC_OUTPUT_MEMORY || s->output_type == TCC_OUTPUT_PREPROCESS) && (s->dflag & 16))
         s->dflag |= t ? 32 : 0, s->run_test = ++t, n = s->nb_files;
 
     /* compile or add each files or library */
-    for (first_file = NULL, ret = 0;;) {
+    for (first_file = NULL, ret = 0;;)
+    {
         struct filespec *f = s->files[s->nb_files - n];
         s->filetype = f->type;
-        if (f->type & AFF_TYPE_LIB) {
+        if (f->type & AFF_TYPE_LIB)
+        {
             if (tcc_add_library_err(s, f->name) < 0)
                 ret = 1;
-        } else {
+        }
+        else
+        {
             if (1 == s->verbose)
                 printf("-> %s\n", f->name);
             if (!first_file)
@@ -336,21 +315,28 @@ redo:
             if (tcc_add_file(s, f->name) < 0)
                 ret = 1;
         }
-        if (--n == 0 || ret
-            || (s->output_type == TCC_OUTPUT_OBJ && !s->option_r))
+        if (--n == 0 || ret || (s->output_type == TCC_OUTPUT_OBJ && !s->option_r))
             break;
     }
 
-    if (s->run_test) {
+    if (s->run_test)
+    {
         t = 0;
-    } else if (s->output_type == TCC_OUTPUT_PREPROCESS) {
+    }
+    else if (s->output_type == TCC_OUTPUT_PREPROCESS)
+    {
         ;
-    } else if (0 == ret) {
-        if (s->output_type == TCC_OUTPUT_MEMORY) {
+    }
+    else if (0 == ret)
+    {
+        if (s->output_type == TCC_OUTPUT_MEMORY)
+        {
 #ifdef TCC_IS_NATIVE
             ret = tcc_run(s, argc, argv);
 #endif
-        } else {
+        }
+        else
+        {
             if (!s->outfile)
                 s->outfile = default_outputfile(s, first_file);
             if (tcc_output_file(s, s->outfile))
@@ -360,8 +346,6 @@ redo:
         }
     }
 
-    if (s->do_bench && (n | t | ret) == 0)
-        tcc_print_stats(s, getclock_ms() - start_time);
     tcc_delete(s);
     if (ret == 0 && n)
         goto redo; /* compile more files with -c */
