@@ -37,16 +37,16 @@ ST_FUNC void g(int c)
     ind = ind1;
 }
 
-ST_FUNC void gen_le16 (int i)
+ST_FUNC void gen_le16(int i)
 {
     g(i);
-    g(i>>8);
+    g(i >> 8);
 }
 
-ST_FUNC void gen_le32 (int i)
+ST_FUNC void gen_le32(int i)
 {
     gen_le16(i);
-    gen_le16(i>>16);
+    gen_le16(i >> 16);
 }
 
 ST_FUNC void gen_expr32(ExprValue *pe)
@@ -66,16 +66,16 @@ ST_FUNC void subst_asm_operand(CString *add_str, SValue *sv, int modifier)
 
 /* generate prolog and epilog code for asm statement */
 ST_FUNC void asm_gen_code(ASMOperand *operands, int nb_operands,
-                         int nb_outputs, int is_output,
-                         uint8_t *clobber_regs,
-                         int out_reg)
+                          int nb_outputs, int is_output,
+                          uint8_t *clobber_regs,
+                          int out_reg)
 {
 }
 
 ST_FUNC void asm_compute_constraints(ASMOperand *operands,
-                                    int nb_operands, int nb_outputs,
-                                    const uint8_t *clobber_regs,
-                                    int *pout_reg)
+                                     int nb_operands, int nb_outputs,
+                                     const uint8_t *clobber_regs,
+                                     int *pout_reg)
 {
 }
 
@@ -84,7 +84,7 @@ ST_FUNC void asm_clobber(uint8_t *clobber_regs, const char *str)
     asm_error();
 }
 
-ST_FUNC int asm_parse_regvar (int t)
+ST_FUNC int asm_parse_regvar(int t)
 {
     asm_error();
     return -1;

@@ -15,14 +15,14 @@
 #define NB_REGS 28 // x0-x18, x30, v0-v7
 
 #define TREG_R(x) (x) // x = 0..18
-#define TREG_R30  19
+#define TREG_R30 19
 #define TREG_F(x) (x + 20) // x = 0..7
 
 // Register classes sorted from more general to more precise:
 #define RC_INT (1 << 0)
 #define RC_FLOAT (1 << 1)
 #define RC_R(x) (1 << (2 + (x))) // x = 0..18
-#define RC_R30  (1 << 21)
+#define RC_R30 (1 << 21)
 #define RC_F(x) (1 << (22 + (x))) // x = 0..7
 
 #define RC_IRET (RC_R(0)) // int return register class
@@ -47,35 +47,34 @@
 #include <assert.h>
 
 ST_DATA const int reg_classes[NB_REGS] = {
-  RC_INT | RC_R(0),
-  RC_INT | RC_R(1),
-  RC_INT | RC_R(2),
-  RC_INT | RC_R(3),
-  RC_INT | RC_R(4),
-  RC_INT | RC_R(5),
-  RC_INT | RC_R(6),
-  RC_INT | RC_R(7),
-  RC_INT | RC_R(8),
-  RC_INT | RC_R(9),
-  RC_INT | RC_R(10),
-  RC_INT | RC_R(11),
-  RC_INT | RC_R(12),
-  RC_INT | RC_R(13),
-  RC_INT | RC_R(14),
-  RC_INT | RC_R(15),
-  RC_INT | RC_R(16),
-  RC_INT | RC_R(17),
-  RC_INT | RC_R(18),
-  RC_R30, // not in RC_INT as we make special use of x30
-  RC_FLOAT | RC_F(0),
-  RC_FLOAT | RC_F(1),
-  RC_FLOAT | RC_F(2),
-  RC_FLOAT | RC_F(3),
-  RC_FLOAT | RC_F(4),
-  RC_FLOAT | RC_F(5),
-  RC_FLOAT | RC_F(6),
-  RC_FLOAT | RC_F(7)
-};
+    RC_INT | RC_R(0),
+    RC_INT | RC_R(1),
+    RC_INT | RC_R(2),
+    RC_INT | RC_R(3),
+    RC_INT | RC_R(4),
+    RC_INT | RC_R(5),
+    RC_INT | RC_R(6),
+    RC_INT | RC_R(7),
+    RC_INT | RC_R(8),
+    RC_INT | RC_R(9),
+    RC_INT | RC_R(10),
+    RC_INT | RC_R(11),
+    RC_INT | RC_R(12),
+    RC_INT | RC_R(13),
+    RC_INT | RC_R(14),
+    RC_INT | RC_R(15),
+    RC_INT | RC_R(16),
+    RC_INT | RC_R(17),
+    RC_INT | RC_R(18),
+    RC_R30, // not in RC_INT as we make special use of x30
+    RC_FLOAT | RC_F(0),
+    RC_FLOAT | RC_F(1),
+    RC_FLOAT | RC_F(2),
+    RC_FLOAT | RC_F(3),
+    RC_FLOAT | RC_F(4),
+    RC_FLOAT | RC_F(5),
+    RC_FLOAT | RC_F(6),
+    RC_FLOAT | RC_F(7)};
 
 #define IS_FREG(x) ((x) >= TREG_F(0))
 
@@ -116,9 +115,9 @@ static int arm64_encode_bimm64(uint64_t x)
     if (x >> 2 == (x & (((uint64_t)1 << (64 - 2)) - 1)))
         rep = 2, x &= ((uint64_t)1 << 2) - 1;
     else if (x >> 4 == (x & (((uint64_t)1 << (64 - 4)) - 1)))
-        rep = 4, x &= ((uint64_t)1 <<  4) - 1;
+        rep = 4, x &= ((uint64_t)1 << 4) - 1;
     else if (x >> 8 == (x & (((uint64_t)1 << (64 - 8)) - 1)))
-        rep = 8, x &= ((uint64_t)1 <<  8) - 1;
+        rep = 8, x &= ((uint64_t)1 << 8) - 1;
     else if (x >> 16 == (x & (((uint64_t)1 << (64 - 16)) - 1)))
         rep = 16, x &= ((uint64_t)1 << 16) - 1;
     else if (x >> 32 == (x & (((uint64_t)1 << (64 - 32)) - 1)))
@@ -127,24 +126,37 @@ static int arm64_encode_bimm64(uint64_t x)
         rep = 64;
 
     pos = 0;
-    if (!(x & (((uint64_t)1 << 32) - 1))) x >>= 32, pos += 32;
-    if (!(x & (((uint64_t)1 << 16) - 1))) x >>= 16, pos += 16;
-    if (!(x & (((uint64_t)1 <<  8) - 1))) x >>= 8, pos += 8;
-    if (!(x & (((uint64_t)1 <<  4) - 1))) x >>= 4, pos += 4;
-    if (!(x & (((uint64_t)1 <<  2) - 1))) x >>= 2, pos += 2;
-    if (!(x & (((uint64_t)1 <<  1) - 1))) x >>= 1, pos += 1;
+    if (!(x & (((uint64_t)1 << 32) - 1)))
+        x >>= 32, pos += 32;
+    if (!(x & (((uint64_t)1 << 16) - 1)))
+        x >>= 16, pos += 16;
+    if (!(x & (((uint64_t)1 << 8) - 1)))
+        x >>= 8, pos += 8;
+    if (!(x & (((uint64_t)1 << 4) - 1)))
+        x >>= 4, pos += 4;
+    if (!(x & (((uint64_t)1 << 2) - 1)))
+        x >>= 2, pos += 2;
+    if (!(x & (((uint64_t)1 << 1) - 1)))
+        x >>= 1, pos += 1;
 
     len = 0;
-    if (!(~x & (((uint64_t)1 << 32) - 1))) x >>= 32, len += 32;
-    if (!(~x & (((uint64_t)1 << 16) - 1))) x >>= 16, len += 16;
-    if (!(~x & (((uint64_t)1 << 8) - 1))) x >>= 8, len += 8;
-    if (!(~x & (((uint64_t)1 << 4) - 1))) x >>= 4, len += 4;
-    if (!(~x & (((uint64_t)1 << 2) - 1))) x >>= 2, len += 2;
-    if (!(~x & (((uint64_t)1 << 1) - 1))) x >>= 1, len += 1;
+    if (!(~x & (((uint64_t)1 << 32) - 1)))
+        x >>= 32, len += 32;
+    if (!(~x & (((uint64_t)1 << 16) - 1)))
+        x >>= 16, len += 16;
+    if (!(~x & (((uint64_t)1 << 8) - 1)))
+        x >>= 8, len += 8;
+    if (!(~x & (((uint64_t)1 << 4) - 1)))
+        x >>= 4, len += 4;
+    if (!(~x & (((uint64_t)1 << 2) - 1)))
+        x >>= 2, len += 2;
+    if (!(~x & (((uint64_t)1 << 1) - 1)))
+        x >>= 1, len += 1;
 
     if (x)
         return -1;
-    if (neg) {
+    if (neg)
+    {
         pos = (pos + len) & (rep - 1);
         len = rep - len;
     }
@@ -194,21 +206,25 @@ static void arm64_movimm(int r, uint64_t x)
     uint32_t i;
     if ((i = arm64_movi(r, x)))
         o(i); // a single MOV
-    else {
+    else
+    {
         // MOVZ/MOVN and 1-3 MOVKs
         int z = 0, m = 0;
         uint32_t mov1 = 0xd2800000; // movz
         uint64_t x1 = x;
-        for (i = 0; i < 64; i += 16) {
+        for (i = 0; i < 64; i += 16)
+        {
             z += !(x >> i & 0xffff);
             m += !(~x >> i & 0xffff);
         }
-        if (m > z) {
+        if (m > z)
+        {
             x1 = ~x;
             mov1 = 0x92800000; // movn
         }
         for (i = 0; i < 64; i += 16)
-            if (x1 >> i & 0xffff) {
+            if (x1 >> i & 0xffff)
+            {
                 o(mov1 | r | (x1 >> i & 0xffff) << 5 | i << 17);
                 // movz/movn x(r),#(*),lsl #(i)
                 break;
@@ -216,7 +232,7 @@ static void arm64_movimm(int r, uint64_t x)
         for (i += 16; i < 64; i += 16)
             if (x1 >> i & 0xffff)
                 o(0xf2800000 | r | (x >> i & 0xffff) << 5 | i << 17);
-                // movk x(r),#(*),lsl #(i)
+        // movk x(r),#(*),lsl #(i)
     }
 }
 
@@ -225,13 +241,14 @@ ST_FUNC void gsym_addr(int t_, int a_)
 {
     uint32_t t = t_;
     uint32_t a = a_;
-    while (t) {
+    while (t)
+    {
         unsigned char *ptr = cur_text_section->data + t;
         uint32_t next = read32le(ptr);
         if (a - t + 0x8000000 >= 0x10000000)
             tcc_error("branch out of range");
-        write32le(ptr, (a - t == 4 ? 0xd503201f : // nop
-                        0x14000000 | ((a - t) >> 2 & 0x3ffffff))); // b
+        write32le(ptr, (a - t == 4 ? 0xd503201f :                      // nop
+                            0x14000000 | ((a - t) >> 2 & 0x3ffffff))); // b
         t = next;
     }
 }
@@ -244,17 +261,28 @@ ST_FUNC void gsym(int t)
 
 static int arm64_type_size(int t)
 {
-    switch (t & VT_BTYPE) {
-    case VT_INT: return 2;
-    case VT_BYTE: return 0;
-    case VT_SHORT: return 1;
-    case VT_PTR: return 3;
-    case VT_FUNC: return 3;
-    case VT_FLOAT: return 2;
-    case VT_DOUBLE: return 3;
-    case VT_LDOUBLE: return 4;
-    case VT_BOOL: return 0;
-    case VT_LLONG: return 3;
+    switch (t & VT_BTYPE)
+    {
+    case VT_INT:
+        return 2;
+    case VT_BYTE:
+        return 0;
+    case VT_SHORT:
+        return 1;
+    case VT_PTR:
+        return 3;
+    case VT_FUNC:
+        return 3;
+    case VT_FLOAT:
+        return 2;
+    case VT_DOUBLE:
+        return 3;
+    case VT_LDOUBLE:
+        return 4;
+    case VT_BOOL:
+        return 0;
+    case VT_LLONG:
+        return 3;
     }
     assert(0);
     return 0;
@@ -267,9 +295,10 @@ static void arm64_spoff(int reg, uint64_t off)
         off = -off;
     if (off < 4096)
         o(0x910003e0 | sub << 30 | reg | off << 10);
-        // (add|sub) x(reg),sp,#(off)
-    else {
-        arm64_movimm(30, off); // use x30 for offset
+    // (add|sub) x(reg),sp,#(off)
+    else
+    {
+        arm64_movimm(30, off);           // use x30 for offset
         o(0x8b3e63e0 | sub << 30 | reg); // (add|sub) x(reg),sp,x30
     }
 }
@@ -281,11 +310,12 @@ static void arm64_ldrx(int sg, int sz_, int dst, int bas, uint64_t off)
         sg = 0;
     if (!(off & ~((uint32_t)0xfff << sz)))
         o(0x39400000 | dst | bas << 5 | off << (10 - sz) |
-          (uint32_t)!!sg << 23 | sz << 30); // ldr(*) x(dst),[x(bas),#(off)]
+          (uint32_t) !!sg << 23 | sz << 30); // ldr(*) x(dst),[x(bas),#(off)]
     else if (off < 256 || -off <= 256)
         o(0x38400000 | dst | bas << 5 | (off & 511) << 12 |
-          (uint32_t)!!sg << 23 | sz << 30); // ldur(*) x(dst),[x(bas),#(off)]
-    else {
+          (uint32_t) !!sg << 23 | sz << 30); // ldur(*) x(dst),[x(bas),#(off)]
+    else
+    {
         arm64_movimm(30, off); // use x30 for offset
         o(0x38206800 | dst | bas << 5 | (uint32_t)30 << 16 |
           (uint32_t)(!!sg + 1) << 22 | sz << 30); // ldr(*) x(dst),[x(bas),x30]
@@ -301,7 +331,8 @@ static void arm64_ldrv(int sz_, int dst, int bas, uint64_t off)
     else if (off < 256 || -off <= 256)
         o(0x3c400000 | dst | bas << 5 | (off & 511) << 12 |
           (sz & 4) << 21 | (sz & 3) << 30); // ldur (s|d|q)(dst),[x(bas),#(off)]
-    else {
+    else
+    {
         arm64_movimm(30, off); // use x30 for offset
         o(0x3c606800 | dst | bas << 5 | (uint32_t)30 << 16 |
           sz << 30 | (sz & 4) << 21); // ldr (s|d|q)(dst),[x(bas),x30]
@@ -312,8 +343,11 @@ static void arm64_ldrs(int reg_, int size)
 {
     uint32_t reg = reg_;
     // Use x30 for intermediate value in some cases.
-    switch (size) {
-    default: assert(0); break;
+    switch (size)
+    {
+    default:
+        assert(0);
+        break;
     case 1:
         arm64_ldrx(0, 0, reg, reg, 0);
         break;
@@ -341,7 +375,7 @@ static void arm64_ldrs(int reg_, int size)
     case 7:
         arm64_ldrx(0, 2, 30, reg, 0);
         arm64_ldrx(0, 2, reg, reg, 3);
-        o(0x53087c00 | reg | reg << 5); // lsr w(reg), w(reg), #8
+        o(0x53087c00 | reg | reg << 5);  // lsr w(reg), w(reg), #8
         o(0xaa0083c0 | reg | reg << 16); // orr x(reg),x30,x(reg),lsl #32
         break;
     case 8:
@@ -357,7 +391,7 @@ static void arm64_ldrs(int reg_, int size)
         break;
     case 11:
         arm64_ldrx(0, 2, reg + 1, reg, 7);
-        o(0x53087c00 | (reg+1) | (reg+1) << 5); // lsr w(reg+1), w(reg+1), #8
+        o(0x53087c00 | (reg + 1) | (reg + 1) << 5); // lsr w(reg+1), w(reg+1), #8
         arm64_ldrx(0, 3, reg, reg, 0);
         break;
     case 12:
@@ -366,21 +400,21 @@ static void arm64_ldrs(int reg_, int size)
         break;
     case 13:
         arm64_ldrx(0, 3, reg + 1, reg, 5);
-        o(0xd358fc00 | (reg+1) | (reg+1) << 5); // lsr x(reg+1), x(reg+1), #24
+        o(0xd358fc00 | (reg + 1) | (reg + 1) << 5); // lsr x(reg+1), x(reg+1), #24
         arm64_ldrx(0, 3, reg, reg, 0);
         break;
     case 14:
         arm64_ldrx(0, 3, reg + 1, reg, 6);
-        o(0xd350fc00 | (reg+1) | (reg+1) << 5); // lsr x(reg+1), x(reg+1), #16
+        o(0xd350fc00 | (reg + 1) | (reg + 1) << 5); // lsr x(reg+1), x(reg+1), #16
         arm64_ldrx(0, 3, reg, reg, 0);
         break;
     case 15:
         arm64_ldrx(0, 3, reg + 1, reg, 7);
-        o(0xd348fc00 | (reg+1) | (reg+1) << 5); // lsr x(reg+1), x(reg+1), #8
+        o(0xd348fc00 | (reg + 1) | (reg + 1) << 5); // lsr x(reg+1), x(reg+1), #8
         arm64_ldrx(0, 3, reg, reg, 0);
         break;
     case 16:
-        o(0xa9400000 | reg | (reg+1) << 10 | reg << 5);
+        o(0xa9400000 | reg | (reg + 1) << 10 | reg << 5);
         // ldp x(reg),x(reg+1),[x(reg)]
         break;
     }
@@ -391,11 +425,12 @@ static void arm64_strx(int sz_, int dst, int bas, uint64_t off)
     uint32_t sz = sz_;
     if (!(off & ~((uint32_t)0xfff << sz)))
         o(0x39000000 | dst | bas << 5 | off << (10 - sz) | sz << 30);
-        // str(*) x(dst),[x(bas],#(off)]
+    // str(*) x(dst),[x(bas],#(off)]
     else if (off < 256 || -off <= 256)
         o(0x38000000 | dst | bas << 5 | (off & 511) << 12 | sz << 30);
-        // stur(*) x(dst),[x(bas],#(off)]
-    else {
+    // stur(*) x(dst),[x(bas],#(off)]
+    else
+    {
         arm64_movimm(30, off); // use x30 for offset
         o(0x38206800 | dst | bas << 5 | (uint32_t)30 << 16 | sz << 30);
         // str(*) x(dst),[x(bas),x30]
@@ -411,7 +446,8 @@ static void arm64_strv(int sz_, int dst, int bas, uint64_t off)
     else if (off < 256 || -off <= 256)
         o(0x3c000000 | dst | bas << 5 | (off & 511) << 12 |
           (sz & 4) << 21 | (sz & 3) << 30); // stur (s|d|q)(dst),[x(bas),#(off)]
-    else {
+    else
+    {
         arm64_movimm(30, off); // use x30 for offset
         o(0x3c206800 | dst | bas << 5 | (uint32_t)30 << 16 |
           sz << 30 | (sz & 4) << 21); // str (s|d|q)(dst),[x(bas),x30]
@@ -427,7 +463,8 @@ static void arm64_sym(int r, Sym *sym, unsigned long addend)
     // relocation and use only relocations with unlimited range.
     int avoid_adrp = 1;
 
-    if (avoid_adrp || sym->a.weak) {
+    if (avoid_adrp || sym->a.weak)
+    {
         // (GCC uses a R_AARCH64_ABS64 in this case.)
         greloca(cur_text_section, sym, ind, R_AARCH64_MOVW_UABS_G0_NC, addend);
         o(0xd2800000 | r); // mov x(rt),#0,lsl #0
@@ -438,7 +475,8 @@ static void arm64_sym(int r, Sym *sym, unsigned long addend)
         greloca(cur_text_section, sym, ind, R_AARCH64_MOVW_UABS_G3, addend);
         o(0xf2e00000 | r); // movk x(rt),#0,lsl #48
     }
-    else {
+    else
+    {
         greloca(cur_text_section, sym, ind, R_AARCH64_ADR_PREL_PG_HI21, addend);
         o(0x90000000 | r);
         greloca(cur_text_section, sym, ind, R_AARCH64_ADD_ABS_LO12_NC, addend);
@@ -454,7 +492,8 @@ ST_FUNC void load(int r, SValue *sv)
     uint64_t svcul = (uint32_t)sv->c.i;
     svcul = svcul >> 31 & 1 ? svcul - ((uint64_t)1 << 32) : svcul;
 
-    if (svr == (VT_LOCAL | VT_LVAL)) {
+    if (svr == (VT_LOCAL | VT_LVAL))
+    {
         if (IS_FREG(r))
             arm64_ldrv(arm64_type_size(svtt), fltr(r), 29, svcul);
         else
@@ -463,7 +502,8 @@ ST_FUNC void load(int r, SValue *sv)
         return;
     }
 
-    if ((svr & ~VT_VALMASK) == VT_LVAL && svrv < VT_CONST) {
+    if ((svr & ~VT_VALMASK) == VT_LVAL && svrv < VT_CONST)
+    {
         if (IS_FREG(r))
             arm64_ldrv(arm64_type_size(svtt), fltr(r), intr(svrv), 0);
         else
@@ -472,7 +512,8 @@ ST_FUNC void load(int r, SValue *sv)
         return;
     }
 
-    if (svr == (VT_CONST | VT_LVAL | VT_SYM)) {
+    if (svr == (VT_CONST | VT_LVAL | VT_SYM))
+    {
         arm64_sym(30, sv->sym, svcul); // use x30 for address
         if (IS_FREG(r))
             arm64_ldrv(arm64_type_size(svtt), fltr(r), 30, 0);
@@ -482,43 +523,48 @@ ST_FUNC void load(int r, SValue *sv)
         return;
     }
 
-    if (svr == (VT_CONST | VT_SYM)) {
+    if (svr == (VT_CONST | VT_SYM))
+    {
         arm64_sym(intr(r), sv->sym, svcul);
         return;
     }
 
-    if (svr == VT_CONST) {
+    if (svr == VT_CONST)
+    {
         if ((svtt & VT_BTYPE) != VT_VOID)
-            arm64_movimm(intr(r), arm64_type_size(svtt) == 3 ?
-                         sv->c.i : (uint32_t)svcul);
+            arm64_movimm(intr(r), arm64_type_size(svtt) == 3 ? sv->c.i : (uint32_t)svcul);
         return;
     }
 
-    if (svr < VT_CONST) {
+    if (svr < VT_CONST)
+    {
         if (IS_FREG(r) && IS_FREG(svr))
             if (svtt == VT_LDOUBLE)
                 o(0x4ea01c00 | fltr(r) | fltr(svr) << 5);
-                    // mov v(r).16b,v(svr).16b
+            // mov v(r).16b,v(svr).16b
             else
                 o(0x1e604000 | fltr(r) | fltr(svr) << 5); // fmov d(r),d(svr)
         else if (!IS_FREG(r) && !IS_FREG(svr))
             o(0xaa0003e0 | intr(r) | intr(svr) << 16); // mov x(r),x(svr)
         else
             assert(0);
-      return;
+        return;
     }
 
-    if (svr == VT_LOCAL) {
+    if (svr == VT_LOCAL)
+    {
         if (-svcul < 0x1000)
             o(0xd10003a0 | intr(r) | -svcul << 10); // sub x(r),x29,#...
-        else {
-            arm64_movimm(30, -svcul); // use x30 for offset
+        else
+        {
+            arm64_movimm(30, -svcul);                     // use x30 for offset
             o(0xcb0003a0 | intr(r) | (uint32_t)30 << 16); // sub x(r),x29,x30
         }
         return;
     }
 
-    if (svr == VT_JMP || svr == VT_JMPI) {
+    if (svr == VT_JMP || svr == VT_JMPI)
+    {
         int t = (svr == VT_JMPI);
         arm64_movimm(intr(r), t);
         o(0x14000002); // b .+8
@@ -527,7 +573,8 @@ ST_FUNC void load(int r, SValue *sv)
         return;
     }
 
-    if (svr == (VT_LLOCAL | VT_LVAL)) {
+    if (svr == (VT_LLOCAL | VT_LVAL))
+    {
         arm64_ldrx(0, 3, 30, 29, svcul); // use x30 for offset
         if (IS_FREG(r))
             arm64_ldrv(arm64_type_size(svtt), fltr(r), 30, 0);
@@ -549,7 +596,8 @@ ST_FUNC void store(int r, SValue *sv)
     uint64_t svcul = (uint32_t)sv->c.i;
     svcul = svcul >> 31 & 1 ? svcul - ((uint64_t)1 << 32) : svcul;
 
-    if (svr == (VT_LOCAL | VT_LVAL)) {
+    if (svr == (VT_LOCAL | VT_LVAL))
+    {
         if (IS_FREG(r))
             arm64_strv(arm64_type_size(svtt), fltr(r), 29, svcul);
         else
@@ -557,7 +605,8 @@ ST_FUNC void store(int r, SValue *sv)
         return;
     }
 
-    if ((svr & ~VT_VALMASK) == VT_LVAL && svrv < VT_CONST) {
+    if ((svr & ~VT_VALMASK) == VT_LVAL && svrv < VT_CONST)
+    {
         if (IS_FREG(r))
             arm64_strv(arm64_type_size(svtt), fltr(r), intr(svrv), 0);
         else
@@ -565,7 +614,8 @@ ST_FUNC void store(int r, SValue *sv)
         return;
     }
 
-    if (svr == (VT_CONST | VT_LVAL | VT_SYM)) {
+    if (svr == (VT_CONST | VT_LVAL | VT_SYM))
+    {
         arm64_sym(30, sv->sym, svcul); // use x30 for address
         if (IS_FREG(r))
             arm64_strv(arm64_type_size(svtt), fltr(r), 30, 0);
@@ -580,10 +630,11 @@ ST_FUNC void store(int r, SValue *sv)
 
 static void arm64_gen_bl_or_b(int b)
 {
-    if ((vtop->r & (VT_VALMASK | VT_LVAL)) == VT_CONST && (vtop->r & VT_SYM)) {
+    if ((vtop->r & (VT_VALMASK | VT_LVAL)) == VT_CONST && (vtop->r & VT_SYM))
+    {
         assert(!b);
-	greloca(cur_text_section, vtop->sym, ind, R_AARCH64_CALL26, 0);
-	o(0x94000000); // bl .
+        greloca(cur_text_section, vtop->sym, ind, R_AARCH64_CALL26, 0);
+        o(0x94000000); // bl .
     }
     else
         o(0xd61f0000 | (uint32_t)!b << 21 | intr(gv(RC_R30)) << 5); // br/blr
@@ -591,24 +642,29 @@ static void arm64_gen_bl_or_b(int b)
 
 static int arm64_hfa_aux(CType *type, int *fsize, int num)
 {
-    if (is_float(type->t)) {
+    if (is_float(type->t))
+    {
         int a, n = type_size(type, &a);
         if (num >= 4 || (*fsize && *fsize != n))
             return -1;
         *fsize = n;
         return num + 1;
     }
-    else if ((type->t & VT_BTYPE) == VT_STRUCT) {
+    else if ((type->t & VT_BTYPE) == VT_STRUCT)
+    {
         int is_struct = 0; // rather than union
         Sym *field;
         for (field = type->ref->next; field; field = field->next)
-            if (field->c) {
+            if (field->c)
+            {
                 is_struct = 1;
                 break;
             }
-        if (is_struct) {
+        if (is_struct)
+        {
             int num0 = num;
-            for (field = type->ref->next; field; field = field->next) {
+            for (field = type->ref->next; field; field = field->next)
+            {
                 if (field->c != (num - num0) * *fsize)
                     return -1;
                 num = arm64_hfa_aux(&field->type, fsize, num);
@@ -619,9 +675,11 @@ static int arm64_hfa_aux(CType *type, int *fsize, int num)
                 return -1;
             return num;
         }
-        else { // union
+        else
+        { // union
             int num0 = num;
-            for (field = type->ref->next; field; field = field->next) {
+            for (field = type->ref->next; field; field = field->next)
+            {
                 int num1 = arm64_hfa_aux(&field->type, fsize, num0);
                 if (num1 == -1)
                     return -1;
@@ -632,7 +690,8 @@ static int arm64_hfa_aux(CType *type, int *fsize, int num)
             return num;
         }
     }
-    else if (type->t & VT_ARRAY) {
+    else if (type->t & VT_ARRAY)
+    {
         int num1;
         if (!type->ref->c)
             return num;
@@ -649,10 +708,12 @@ static int arm64_hfa_aux(CType *type, int *fsize, int num)
 
 static int arm64_hfa(CType *type, int *fsize)
 {
-    if ((type->t & VT_BTYPE) == VT_STRUCT || (type->t & VT_ARRAY)) {
+    if ((type->t & VT_BTYPE) == VT_STRUCT || (type->t & VT_ARRAY))
+    {
         int sz = 0;
         int n = arm64_hfa_aux(type, &sz, 0);
-        if (0 < n && n <= 4) {
+        if (0 < n && n <= 4)
+        {
             if (fsize)
                 *fsize = sz;
             return n;
@@ -663,12 +724,13 @@ static int arm64_hfa(CType *type, int *fsize)
 
 static unsigned long arm64_pcs_aux(int n, CType **type, unsigned long *a)
 {
-    int nx = 0; // next integer register
-    int nv = 0; // next vector register
+    int nx = 0;            // next integer register
+    int nv = 0;            // next vector register
     unsigned long ns = 32; // next stack offset
     int i;
 
-    for (i = 0; i < n; i++) {
+    for (i = 0; i < n; i++)
+    {
         int hfa = arm64_hfa(type[i], 0);
         int size, align;
 
@@ -681,11 +743,13 @@ static unsigned long arm64_pcs_aux(int n, CType **type, unsigned long *a)
         if (hfa)
             // B.2
             ;
-        else if (size > 16) {
+        else if (size > 16)
+        {
             // B.3: replace with pointer
             if (nx < 8)
                 a[i] = nx++ << 1 | 1;
-            else {
+            else
+            {
                 ns = (ns + 7) & ~7;
                 a[i] = ns | 1;
                 ns += 8;
@@ -697,26 +761,30 @@ static unsigned long arm64_pcs_aux(int n, CType **type, unsigned long *a)
             size = (size + 7) & ~7;
 
         // C.1
-        if (is_float(type[i]->t) && nv < 8) {
+        if (is_float(type[i]->t) && nv < 8)
+        {
             a[i] = 16 + (nv++ << 1);
             continue;
         }
 
         // C.2
-        if (hfa && nv + hfa <= 8) {
+        if (hfa && nv + hfa <= 8)
+        {
             a[i] = 16 + (nv << 1);
             nv += hfa;
             continue;
         }
 
         // C.3
-        if (hfa) {
+        if (hfa)
+        {
             nv = 8;
             size = (size + 7) & ~7;
         }
 
         // C.4
-        if (hfa || (type[i]->t & VT_BTYPE) == VT_LDOUBLE) {
+        if (hfa || (type[i]->t & VT_BTYPE) == VT_LDOUBLE)
+        {
             ns = (ns + 7) & ~7;
             ns = (ns + align - 1) & -align;
         }
@@ -726,14 +794,16 @@ static unsigned long arm64_pcs_aux(int n, CType **type, unsigned long *a)
             size = 8;
 
         // C.6
-        if (hfa || is_float(type[i]->t)) {
+        if (hfa || is_float(type[i]->t))
+        {
             a[i] = ns;
             ns += size;
             continue;
         }
 
         // C.7
-        if ((type[i]->t & VT_BTYPE) != VT_STRUCT && size <= 8 && nx < 8) {
+        if ((type[i]->t & VT_BTYPE) != VT_STRUCT && size <= 8 && nx < 8)
+        {
             a[i] = nx++ << 1;
             continue;
         }
@@ -743,14 +813,16 @@ static unsigned long arm64_pcs_aux(int n, CType **type, unsigned long *a)
             nx = (nx + 1) & ~1;
 
         // C.9
-        if ((type[i]->t & VT_BTYPE) != VT_STRUCT && size == 16 && nx < 7) {
+        if ((type[i]->t & VT_BTYPE) != VT_STRUCT && size == 16 && nx < 7)
+        {
             a[i] = nx << 1;
             nx += 2;
             continue;
         }
 
         // C.10
-        if ((type[i]->t & VT_BTYPE) == VT_STRUCT && size <= (8 - nx) * 8) {
+        if ((type[i]->t & VT_BTYPE) == VT_STRUCT && size <= (8 - nx) * 8)
+        {
             a[i] = nx << 1;
             nx += (size + 7) >> 3;
             continue;
@@ -764,7 +836,8 @@ static unsigned long arm64_pcs_aux(int n, CType **type, unsigned long *a)
         ns = (ns + align - 1) & -align;
 
         // C.13
-        if ((type[i]->t & VT_BTYPE) == VT_STRUCT) {
+        if ((type[i]->t & VT_BTYPE) == VT_STRUCT)
+        {
             a[i] = ns;
             ns += size;
             continue;
@@ -789,7 +862,8 @@ static unsigned long arm64_pcs(int n, CType **type, unsigned long *a)
     // Return type:
     if ((type[0]->t & VT_BTYPE) == VT_VOID)
         a[0] = -1;
-    else {
+    else
+    {
         arm64_pcs_aux(1, type, a);
         assert(a[0] == 0 || a[0] == 1 || a[0] == 16);
     }
@@ -797,9 +871,11 @@ static unsigned long arm64_pcs(int n, CType **type, unsigned long *a)
     // Argument types:
     stack = arm64_pcs_aux(n, type + 1, a + 1);
 
-    if (0) {
+    if (0)
+    {
         int i;
-        for (i = 0; i <= n; i++) {
+        for (i = 0; i <= n; i++)
+        {
             if (!i)
                 printf("arm64_pcs return: ");
             else
@@ -845,7 +921,8 @@ ST_FUNC void gfunc_call(int nb_args)
 
     // Allocate space for structs replaced by pointer:
     for (i = nb_args; i; i--)
-        if (a[i] & 1) {
+        if (a[i] & 1)
+        {
             SValue *arg = &vtop[i - nb_args];
             int align, size = type_size(&arg->type, &align);
             assert((arg->type.t & VT_BTYPE) == VT_STRUCT);
@@ -861,38 +938,45 @@ ST_FUNC void gfunc_call(int nb_args)
         o(0xd10003ff | stack << 10); // sub sp,sp,#(n)
 
     // First pass: set all values on stack
-    for (i = nb_args; i; i--) {
+    for (i = nb_args; i; i--)
+    {
         vpushv(vtop - nb_args + i);
 
-        if (a[i] & 1) {
+        if (a[i] & 1)
+        {
             // struct replaced by pointer
             int r = get_reg(RC_INT);
             arm64_spoff(intr(r), a1[i]);
             vset(&vtop->type, r | VT_LVAL, 0);
             vswap();
             vstore();
-            if (a[i] >= 32) {
+            if (a[i] >= 32)
+            {
                 // pointer on stack
                 r = get_reg(RC_INT);
                 arm64_spoff(intr(r), a1[i]);
                 arm64_strx(3, intr(r), 31, (a[i] - 32) >> 1 << 1);
             }
         }
-        else if (a[i] >= 32) {
+        else if (a[i] >= 32)
+        {
             // value on stack
-            if ((vtop->type.t & VT_BTYPE) == VT_STRUCT) {
+            if ((vtop->type.t & VT_BTYPE) == VT_STRUCT)
+            {
                 int r = get_reg(RC_INT);
                 arm64_spoff(intr(r), a[i] - 32);
                 vset(&vtop->type, r | VT_LVAL, 0);
                 vswap();
                 vstore();
             }
-            else if (is_float(vtop->type.t)) {
+            else if (is_float(vtop->type.t))
+            {
                 gv(RC_FLOAT);
                 arm64_strv(arm64_type_size(vtop[0].type.t),
                            fltr(vtop[0].r), 31, a[i] - 32);
             }
-            else {
+            else
+            {
                 gv(RC_INT);
                 arm64_strx(arm64_type_size(vtop[0].type.t),
                            intr(vtop[0].r), 31, a[i] - 32);
@@ -903,10 +987,13 @@ ST_FUNC void gfunc_call(int nb_args)
     }
 
     // Second pass: assign values to registers
-    for (i = nb_args; i; i--, vtop--) {
-        if (a[i] < 16 && !(a[i] & 1)) {
+    for (i = nb_args; i; i--, vtop--)
+    {
+        if (a[i] < 16 && !(a[i] & 1))
+        {
             // value in general-purpose registers
-            if ((vtop->type.t & VT_BTYPE) == VT_STRUCT) {
+            if ((vtop->type.t & VT_BTYPE) == VT_STRUCT)
+            {
                 int align, size = type_size(&vtop->type, &align);
                 vtop->type.t = VT_PTR;
                 gaddrof();
@@ -919,9 +1006,11 @@ ST_FUNC void gfunc_call(int nb_args)
         else if (a[i] < 16)
             // struct replaced by pointer in register
             arm64_spoff(a[i] / 2, a1[i]);
-        else if (a[i] < 32) {
+        else if (a[i] < 32)
+        {
             // value in floating-point registers
-            if ((vtop->type.t & VT_BTYPE) == VT_STRUCT) {
+            if ((vtop->type.t & VT_BTYPE) == VT_STRUCT)
+            {
                 uint32_t j, sz, n = arm64_hfa(&vtop->type, &sz);
                 vtop->type.t = VT_PTR;
                 gaddrof();
@@ -937,8 +1026,10 @@ ST_FUNC void gfunc_call(int nb_args)
         }
     }
 
-    if ((return_type->t & VT_BTYPE) == VT_STRUCT) {
-        if (a[0] == 1) {
+    if ((return_type->t & VT_BTYPE) == VT_STRUCT)
+    {
+        if (a[0] == 1)
+        {
             // indirect return: set x8 and discard the stack value
             gv(RC_R(8));
             --vtop;
@@ -960,21 +1051,23 @@ ST_FUNC void gfunc_call(int nb_args)
         if (bt == VT_BYTE || bt == VT_SHORT)
             // Promote small integers:
             o(0x13001c00 | (bt == VT_SHORT) << 13 |
-              (uint32_t)!!(rt & VT_UNSIGNED) << 30); // [su]xt[bh] w0,w0
-        else if (bt == VT_STRUCT && !(a[0] & 1)) {
+              (uint32_t) !!(rt & VT_UNSIGNED) << 30); // [su]xt[bh] w0,w0
+        else if (bt == VT_STRUCT && !(a[0] & 1))
+        {
             // A struct was returned in registers, so write it out:
             gv(RC_R(8));
             --vtop;
-            if (a[0] == 0) {
+            if (a[0] == 0)
+            {
                 int align, size = type_size(return_type, &align);
                 assert(size <= 16);
                 if (size > 8)
                     o(0xa9000500); // stp x0,x1,[x8]
                 else if (size)
                     arm64_strx(size > 4 ? 3 : size > 2 ? 2 : size > 1, 0, 8, 0);
-
             }
-            else if (a[0] == 16) {
+            else if (a[0] == 16)
+            {
                 uint32_t j, sz, n = arm64_hfa(return_type, &sz);
                 for (j = 0; j < n; j++)
                     o(0x3d000100 |
@@ -1031,30 +1124,35 @@ ST_FUNC void gfunc_prolog(CType *func_type)
     arm64_func_va_list_gr_offs = -64;
     arm64_func_va_list_vr_offs = -128;
 
-    for (i = 1, sym = func_type->ref->next; sym; i++, sym = sym->next) {
-        int off = (a[i] < 16 ? 160 + a[i] / 2 * 8 :
-                   a[i] < 32 ? 16 + (a[i] - 16) / 2 * 16 :
-                   224 + ((a[i] - 32) >> 1 << 1));
+    for (i = 1, sym = func_type->ref->next; sym; i++, sym = sym->next)
+    {
+        int off = (a[i] < 16 ? 160 + a[i] / 2 * 8 : a[i] < 32 ? 16 + (a[i] - 16) / 2 * 16 : 224 + ((a[i] - 32) >> 1 << 1));
         sym_push(sym->v & ~SYM_FIELD, &sym->type,
                  (a[i] & 1 ? VT_LLOCAL : VT_LOCAL) | lvalue_type(sym->type.t),
                  off);
 
-        if (a[i] < 16) {
+        if (a[i] < 16)
+        {
             int align, size = type_size(&sym->type, &align);
             arm64_func_va_list_gr_offs = (a[i] / 2 - 7 +
-                                          (!(a[i] & 1) && size > 8)) * 8;
+                                          (!(a[i] & 1) && size > 8)) *
+                                         8;
         }
-        else if (a[i] < 32) {
+        else if (a[i] < 32)
+        {
             uint32_t hfa = arm64_hfa(&sym->type, 0);
             arm64_func_va_list_vr_offs = (a[i] / 2 - 16 +
-                                          (hfa ? hfa : 1)) * 16;
+                                          (hfa ? hfa : 1)) *
+                                         16;
         }
 
         // HFAs of float and double need to be written differently:
-        if (16 <= a[i] && a[i] < 32 && (sym->type.t & VT_BTYPE) == VT_STRUCT) {
+        if (16 <= a[i] && a[i] < 32 && (sym->type.t & VT_BTYPE) == VT_STRUCT)
+        {
             uint32_t j, sz, k = arm64_hfa(&sym->type, &sz);
             if (sz < 16)
-                for (j = 0; j < k; j++) {
+                for (j = 0; j < k; j++)
+                {
                     o(0x3d0003e0 | -(sz & 8) << 27 | (sz & 4) << 29 |
                       ((a[i] - 16) / 2 + j) | (off / sz + j) << 10);
                     // str ([sdq])(*),[sp,#(j * sz)]
@@ -1080,23 +1178,26 @@ ST_FUNC void gen_va_start(void)
     gaddrof();
     r = intr(gv(RC_INT));
 
-    if (arm64_func_va_list_stack) {
+    if (arm64_func_va_list_stack)
+    {
         //xx could use add (immediate) here
         arm64_movimm(30, arm64_func_va_list_stack + 224);
         o(0x8b1e03be); // add x30,x29,x30
     }
     else
-        o(0x910383be); // add x30,x29,#224
+        o(0x910383be);      // add x30,x29,#224
     o(0xf900001e | r << 5); // str x30,[x(r)]
 
-    if (arm64_func_va_list_gr_offs) {
+    if (arm64_func_va_list_gr_offs)
+    {
         if (arm64_func_va_list_stack)
-            o(0x910383be); // add x30,x29,#224
+            o(0x910383be);      // add x30,x29,#224
         o(0xf900041e | r << 5); // str x30,[x(r),#8]
     }
 
-    if (arm64_func_va_list_vr_offs) {
-        o(0x910243be); // add x30,x29,#144
+    if (arm64_func_va_list_vr_offs)
+    {
+        o(0x910243be);          // add x30,x29,#144
         o(0xf900081e | r << 5); // str x30,[x(r),#16]
     }
 
@@ -1115,7 +1216,8 @@ ST_FUNC void gen_va_arg(CType *t)
     int fsize, hfa = arm64_hfa(t, &fsize);
     uint32_t r0, r1;
 
-    if (is_float(t->t)) {
+    if (is_float(t->t))
+    {
         hfa = 1;
         fsize = size;
     }
@@ -1126,48 +1228,55 @@ ST_FUNC void gen_va_arg(CType *t)
     vtop[0].r = r1 | lvalue_type(t->t);
     r1 = intr(r1);
 
-    if (!hfa) {
+    if (!hfa)
+    {
         uint32_t n = size > 16 ? 8 : (size + 7) & -8;
         o(0xb940181e | r0 << 5); // ldr w30,[x(r0),#24] // __gr_offs
-        if (align == 16) {
-            assert(0); // this path untested but needed for __uint128_t
+        if (align == 16)
+        {
+            assert(0);     // this path untested but needed for __uint128_t
             o(0x11003fde); // add w30,w30,#15
             o(0x121c6fde); // and w30,w30,#-16
         }
-        o(0x310003c0 | r1 | n << 10); // adds w(r1),w30,#(n)
-        o(0x540000ad); // b.le .+20
-        o(0xf9400000 | r1 | r0 << 5); // ldr x(r1),[x(r0)] // __stack
+        o(0x310003c0 | r1 | n << 10);      // adds w(r1),w30,#(n)
+        o(0x540000ad);                     // b.le .+20
+        o(0xf9400000 | r1 | r0 << 5);      // ldr x(r1),[x(r0)] // __stack
         o(0x9100001e | r1 << 5 | n << 10); // add x30,x(r1),#(n)
-        o(0xf900001e | r0 << 5); // str x30,[x(r0)] // __stack
-        o(0x14000004); // b .+16
-        o(0xb9001800 | r1 | r0 << 5); // str w(r1),[x(r0),#24] // __gr_offs
-        o(0xf9400400 | r1 | r0 << 5); // ldr x(r1),[x(r0),#8] // __gr_top
-        o(0x8b3ec000 | r1 | r1 << 5); // add x(r1),x(r1),w30,sxtw
+        o(0xf900001e | r0 << 5);           // str x30,[x(r0)] // __stack
+        o(0x14000004);                     // b .+16
+        o(0xb9001800 | r1 | r0 << 5);      // str w(r1),[x(r0),#24] // __gr_offs
+        o(0xf9400400 | r1 | r0 << 5);      // ldr x(r1),[x(r0),#8] // __gr_top
+        o(0x8b3ec000 | r1 | r1 << 5);      // add x(r1),x(r1),w30,sxtw
         if (size > 16)
             o(0xf9400000 | r1 | r1 << 5); // ldr x(r1),[x(r1)]
     }
-    else {
+    else
+    {
         uint32_t rsz = hfa << 4;
         uint32_t ssz = (size + 7) & -(uint32_t)8;
         uint32_t b1, b2;
-        o(0xb9401c1e | r0 << 5); // ldr w30,[x(r0),#28] // __vr_offs
+        o(0xb9401c1e | r0 << 5);        // ldr w30,[x(r0),#28] // __vr_offs
         o(0x310003c0 | r1 | rsz << 10); // adds w(r1),w30,#(rsz)
-        b1 = ind; o(0x5400000d); // b.le lab1
+        b1 = ind;
+        o(0x5400000d);                // b.le lab1
         o(0xf9400000 | r1 | r0 << 5); // ldr x(r1),[x(r0)] // __stack
-        if (fsize == 16) {
+        if (fsize == 16)
+        {
             o(0x91003c00 | r1 | r1 << 5); // add x(r1),x(r1),#15
             o(0x927cec00 | r1 | r1 << 5); // and x(r1),x(r1),#-16
         }
         o(0x9100001e | r1 << 5 | ssz << 10); // add x30,x(r1),#(ssz)
-        o(0xf900001e | r0 << 5); // str x30,[x(r0)] // __stack
-        b2 = ind; o(0x14000000); // b lab2
+        o(0xf900001e | r0 << 5);             // str x30,[x(r0)] // __stack
+        b2 = ind;
+        o(0x14000000); // b lab2
         // lab1:
         write32le(cur_text_section->data + b1, 0x5400000d | (ind - b1) << 3);
         o(0xb9001c00 | r1 | r0 << 5); // str w(r1),[x(r0),#28] // __vr_offs
         o(0xf9400800 | r1 | r0 << 5); // ldr x(r1),[x(r0),#16] // __vr_top
         if (hfa == 1 || fsize == 16)
             o(0x8b3ec000 | r1 | r1 << 5); // add x(r1),x(r1),w30,sxtw
-        else {
+        else
+        {
             // We need to change the layout of this HFA.
             // Get some space on the stack using global variable "loc":
             loc = (loc - size) & -(uint32_t)align;
@@ -1198,11 +1307,13 @@ ST_FUNC void gfunc_return(CType *func_type)
     unsigned long a;
 
     arm64_pcs(0, &t, &a);
-    switch (a) {
+    switch (a)
+    {
     case -1:
         break;
     case 0:
-        if ((func_type->t & VT_BTYPE) == VT_STRUCT) {
+        if ((func_type->t & VT_BTYPE) == VT_STRUCT)
+        {
             int align, size = type_size(func_type, &align);
             gaddrof();
             gv(RC_R(0));
@@ -1211,7 +1322,8 @@ ST_FUNC void gfunc_return(CType *func_type)
         else
             gv(RC_IRET);
         break;
-    case 1: {
+    case 1:
+    {
         CType type = *func_type;
         mk_pointer(&type);
         vset(&type, VT_LOCAL | VT_LVAL, func_vc);
@@ -1221,46 +1333,52 @@ ST_FUNC void gfunc_return(CType *func_type)
         break;
     }
     case 16:
-        if ((func_type->t & VT_BTYPE) == VT_STRUCT) {
-          uint32_t j, sz, n = arm64_hfa(&vtop->type, &sz);
-          gaddrof();
-          gv(RC_R(0));
-          for (j = 0; j < n; j++)
-              o(0x3d400000 |
-                (sz & 16) << 19 | -(sz & 8) << 27 | (sz & 4) << 29 |
-                j | j << 10); // ldr ([sdq])(*),[x0,#(j * sz)]
+        if ((func_type->t & VT_BTYPE) == VT_STRUCT)
+        {
+            uint32_t j, sz, n = arm64_hfa(&vtop->type, &sz);
+            gaddrof();
+            gv(RC_R(0));
+            for (j = 0; j < n; j++)
+                o(0x3d400000 |
+                  (sz & 16) << 19 | -(sz & 8) << 27 | (sz & 4) << 29 |
+                  j | j << 10); // ldr ([sdq])(*),[x0,#(j * sz)]
         }
         else
             gv(RC_FRET);
         break;
     default:
-      assert(0);
+        assert(0);
     }
     vtop--;
 }
 
 ST_FUNC void gfunc_epilog(void)
 {
-    if (loc) {
+    if (loc)
+    {
         // Insert instructions to subtract size of stack frame from SP.
         unsigned char *ptr = cur_text_section->data + arm64_func_sub_sp_offset;
         uint64_t diff = (-loc + 15) & ~15;
-        if (!(diff >> 24)) {
+        if (!(diff >> 24))
+        {
             if (diff & 0xfff) // sub sp,sp,#(diff & 0xfff)
                 write32le(ptr, 0xd10003ff | (diff & 0xfff) << 10);
             if (diff >> 12) // sub sp,sp,#(diff >> 12),lsl #12
                 write32le(ptr + 4, 0xd14003ff | (diff >> 12) << 10);
         }
-        else {
+        else
+        {
             // In this case we may subtract more than necessary,
             // but always less than 17/16 of what we were aiming for.
             int i = 0;
             int j = 0;
-            while (diff >> 20) {
+            while (diff >> 20)
+            {
                 diff = (diff + 0xffff) >> 16;
                 ++i;
             }
-            while (diff >> 16) {
+            while (diff >> 16)
+            {
                 diff = (diff + 1) >> 1;
                 ++j;
             }
@@ -1279,10 +1397,11 @@ ST_FUNC void gfunc_epilog(void)
 ST_FUNC void gen_fill_nops(int bytes)
 {
     if ((bytes & 3))
-      tcc_error("alignment of code section not multiple of 4");
-    while (bytes > 0) {
-	o(0xd503201f); // nop
-	bytes -= 4;
+        tcc_error("alignment of code section not multiple of 4");
+    while (bytes > 0)
+    {
+        o(0xd503201f); // nop
+        bytes -= 4;
     }
 }
 
@@ -1306,7 +1425,8 @@ ST_FUNC void gjmp_addr(int a)
 ST_FUNC int gtst(int inv, int t)
 {
     int bt = vtop->type.t & VT_BTYPE;
-    if (bt == VT_LDOUBLE) {
+    if (bt == VT_LDOUBLE)
+    {
         uint32_t a, b, f = fltr(gv(RC_FLOAT));
         a = get_reg(RC_INT);
         vpushi(0);
@@ -1314,18 +1434,20 @@ ST_FUNC int gtst(int inv, int t)
         b = get_reg(RC_INT);
         a = intr(a);
         b = intr(b);
-        o(0x4e083c00 | a | f << 5); // mov x(a),v(f).d[0]
-        o(0x4e183c00 | b | f << 5); // mov x(b),v(f).d[1]
+        o(0x4e083c00 | a | f << 5);           // mov x(a),v(f).d[0]
+        o(0x4e183c00 | b | f << 5);           // mov x(b),v(f).d[1]
         o(0xaa000400 | a | a << 5 | b << 16); // orr x(a),x(a),x(b),lsl #1
-        o(0xb4000040 | a | !!inv << 24); // cbz/cbnz x(a),.+8
+        o(0xb4000040 | a | !!inv << 24);      // cbz/cbnz x(a),.+8
         --vtop;
     }
-    else if (bt == VT_FLOAT || bt == VT_DOUBLE) {
+    else if (bt == VT_FLOAT || bt == VT_DOUBLE)
+    {
         uint32_t a = fltr(gv(RC_FLOAT));
         o(0x1e202008 | a << 5 | (bt != VT_FLOAT) << 22); // fcmp
-        o(0x54000040 | !!inv); // b.eq/b.ne .+8
+        o(0x54000040 | !!inv);                           // b.eq/b.ne .+8
     }
-    else {
+    else
+    {
         uint32_t ll = (bt == VT_PTR || bt == VT_LLONG);
         uint32_t a = intr(gv(RC_INT));
         o(0x34000040 | a | !!inv << 24 | ll << 31); // cbz/cbnz wA,.+8
@@ -1338,12 +1460,11 @@ static int arm64_iconst(uint64_t *val, SValue *sv)
 {
     if ((sv->r & (VT_VALMASK | VT_LVAL | VT_SYM)) != VT_CONST)
         return 0;
-    if (val) {
+    if (val)
+    {
         int t = sv->type.t;
-	int bt = t & VT_BTYPE;
-        *val = ((bt == VT_LLONG || bt == VT_PTR) ? sv->c.i :
-                (uint32_t)sv->c.i |
-                (t & VT_UNSIGNED ? 0 : -(sv->c.i & 0x80000000)));
+        int bt = t & VT_BTYPE;
+        *val = ((bt == VT_LLONG || bt == VT_PTR) ? sv->c.i : (uint32_t)sv->c.i | (t & VT_UNSIGNED ? 0 : -(sv->c.i & 0x80000000)));
     }
     return 1;
 }
@@ -1351,15 +1472,18 @@ static int arm64_iconst(uint64_t *val, SValue *sv)
 static int arm64_gen_opic(int op, uint32_t l, int rev, uint64_t val,
                           uint32_t x, uint32_t a)
 {
-    if (op == '-' && !rev) {
+    if (op == '-' && !rev)
+    {
         val = -val;
         op = '+';
     }
     val = l ? val : (uint32_t)val;
 
-    switch (op) {
+    switch (op)
+    {
 
-    case '+': {
+    case '+':
+    {
         uint32_t s = l ? val >> 63 : val >> 31;
         val = s ? -val : val;
         val = l ? val : (uint32_t)val;
@@ -1367,44 +1491,48 @@ static int arm64_gen_opic(int op, uint32_t l, int rev, uint64_t val,
             o(0x11000000 | l << 31 | s << 30 | x | a << 5 | val << 10);
         else if (!(val & ~(uint64_t)0xfff000))
             o(0x11400000 | l << 31 | s << 30 | x | a << 5 | val >> 12 << 10);
-        else {
+        else
+        {
             arm64_movimm(30, val); // use x30
             o(0x0b1e0000 | l << 31 | s << 30 | x | a << 5);
         }
         return 1;
-      }
+    }
 
     case '-':
         if (!val)
             o(0x4b0003e0 | l << 31 | x | a << 16); // neg
         else if (val == (l ? (uint64_t)-1 : (uint32_t)-1))
             o(0x2a2003e0 | l << 31 | x | a << 16); // mvn
-        else {
-            arm64_movimm(30, val); // use x30
+        else
+        {
+            arm64_movimm(30, val);                 // use x30
             o(0x4b0003c0 | l << 31 | x | a << 16); // sub
         }
         return 1;
 
     case '^':
-        if (val == -1 || (val == 0xffffffff && !l)) {
+        if (val == -1 || (val == 0xffffffff && !l))
+        {
             o(0x2a2003e0 | l << 31 | x | a << 16); // mvn
             return 1;
         }
         // fall through
     case '&':
-    case '|': {
+    case '|':
+    {
         int e = arm64_encode_bimm64(l ? val : val | val << 32);
         if (e < 0)
             return 0;
-        o((op == '&' ? 0x12000000 :
-           op == '|' ? 0x32000000 : 0x52000000) |
+        o((op == '&' ? 0x12000000 : op == '|' ? 0x32000000 : 0x52000000) |
           l << 31 | x | a << 5 | (uint32_t)e << 10);
         return 1;
     }
 
     case TOK_SAR:
     case TOK_SHL:
-    case TOK_SHR: {
+    case TOK_SHR:
+    {
         uint32_t n = 32 << l;
         val = val & (n - 1);
         if (rev)
@@ -1419,7 +1547,6 @@ static int arm64_gen_opic(int op, uint32_t l, int rev, uint64_t val,
               x | a << 5 | val << 16 | (n - 1) << 10); // lsr/asr
         return 1;
     }
-
     }
     return 0;
 }
@@ -1433,17 +1560,20 @@ static void arm64_gen_opil(int op, uint32_t l)
         uint64_t val;
         int rev = 1;
 
-        if (arm64_iconst(0, &vtop[0])) {
+        if (arm64_iconst(0, &vtop[0]))
+        {
             vswap();
             rev = 0;
         }
-        if (arm64_iconst(&val, &vtop[-1])) {
+        if (arm64_iconst(&val, &vtop[-1]))
+        {
             gv(RC_INT);
             a = intr(vtop[0].r);
             --vtop;
             x = get_reg(RC_INT);
             ++vtop;
-            if (arm64_gen_opic(op, l, rev, val, intr(x), a)) {
+            if (arm64_gen_opic(op, l, rev, val, intr(x), a))
+            {
                 vtop[0].r = x;
                 vswap();
                 --vtop;
@@ -1464,7 +1594,8 @@ static void arm64_gen_opil(int op, uint32_t l)
     vtop[0].r = x;
     x = intr(x);
 
-    switch (op) {
+    switch (op)
+    {
     case '%':
         // Use x30 for quotient:
         o(0x1ac00c00 | l << 31 | 30 | a << 5 | b << 16); // sdiv
@@ -1494,27 +1625,27 @@ static void arm64_gen_opil(int op, uint32_t l)
         break;
     case TOK_EQ:
         o(0x6b00001f | l << 31 | a << 5 | b << 16); // cmp
-        o(0x1a9f17e0 | x); // cset wA,eq
+        o(0x1a9f17e0 | x);                          // cset wA,eq
         break;
     case TOK_GE:
         o(0x6b00001f | l << 31 | a << 5 | b << 16); // cmp
-        o(0x1a9fb7e0 | x); // cset wA,ge
+        o(0x1a9fb7e0 | x);                          // cset wA,ge
         break;
     case TOK_GT:
         o(0x6b00001f | l << 31 | a << 5 | b << 16); // cmp
-        o(0x1a9fd7e0 | x); // cset wA,gt
+        o(0x1a9fd7e0 | x);                          // cset wA,gt
         break;
     case TOK_LE:
         o(0x6b00001f | l << 31 | a << 5 | b << 16); // cmp
-        o(0x1a9fc7e0 | x); // cset wA,le
+        o(0x1a9fc7e0 | x);                          // cset wA,le
         break;
     case TOK_LT:
         o(0x6b00001f | l << 31 | a << 5 | b << 16); // cmp
-        o(0x1a9fa7e0 | x); // cset wA,lt
+        o(0x1a9fa7e0 | x);                          // cset wA,lt
         break;
     case TOK_NE:
         o(0x6b00001f | l << 31 | a << 5 | b << 16); // cmp
-        o(0x1a9f07e0 | x); // cset wA,ne
+        o(0x1a9f07e0 | x);                          // cset wA,ne
         break;
     case TOK_SAR:
         o(0x1ac02800 | l << 31 | x | a << 5 | b << 16); // asr
@@ -1531,19 +1662,19 @@ static void arm64_gen_opil(int op, uint32_t l)
         break;
     case TOK_UGE:
         o(0x6b00001f | l << 31 | a << 5 | b << 16); // cmp
-        o(0x1a9f37e0 | x); // cset wA,cs
+        o(0x1a9f37e0 | x);                          // cset wA,cs
         break;
     case TOK_UGT:
         o(0x6b00001f | l << 31 | a << 5 | b << 16); // cmp
-        o(0x1a9f97e0 | x); // cset wA,hi
+        o(0x1a9f97e0 | x);                          // cset wA,hi
         break;
     case TOK_ULT:
         o(0x6b00001f | l << 31 | a << 5 | b << 16); // cmp
-        o(0x1a9f27e0 | x); // cset wA,cc
+        o(0x1a9f27e0 | x);                          // cset wA,cc
         break;
     case TOK_ULE:
         o(0x6b00001f | l << 31 | a << 5 | b << 16); // cmp
-        o(0x1a9f87e0 | x); // cset wA,ls
+        o(0x1a9f87e0 | x);                          // cset wA,ls
         break;
     case TOK_UMOD:
         // Use x30 for quotient:
@@ -1570,22 +1701,52 @@ ST_FUNC void gen_opf(int op)
 {
     uint32_t x, a, b, dbl;
 
-    if (vtop[0].type.t == VT_LDOUBLE) {
+    if (vtop[0].type.t == VT_LDOUBLE)
+    {
         CType type = vtop[0].type;
         int func = 0;
         int cond = -1;
-        switch (op) {
-        case '*': func = TOK___multf3; break;
-        case '+': func = TOK___addtf3; break;
-        case '-': func = TOK___subtf3; break;
-        case '/': func = TOK___divtf3; break;
-        case TOK_EQ: func = TOK___eqtf2; cond = 1; break;
-        case TOK_NE: func = TOK___netf2; cond = 0; break;
-        case TOK_LT: func = TOK___lttf2; cond = 10; break;
-        case TOK_GE: func = TOK___getf2; cond = 11; break;
-        case TOK_LE: func = TOK___letf2; cond = 12; break;
-        case TOK_GT: func = TOK___gttf2; cond = 13; break;
-        default: assert(0); break;
+        switch (op)
+        {
+        case '*':
+            func = TOK___multf3;
+            break;
+        case '+':
+            func = TOK___addtf3;
+            break;
+        case '-':
+            func = TOK___subtf3;
+            break;
+        case '/':
+            func = TOK___divtf3;
+            break;
+        case TOK_EQ:
+            func = TOK___eqtf2;
+            cond = 1;
+            break;
+        case TOK_NE:
+            func = TOK___netf2;
+            cond = 0;
+            break;
+        case TOK_LT:
+            func = TOK___lttf2;
+            cond = 10;
+            break;
+        case TOK_GE:
+            func = TOK___getf2;
+            cond = 11;
+            break;
+        case TOK_LE:
+            func = TOK___letf2;
+            cond = 12;
+            break;
+        case TOK_GT:
+            func = TOK___gttf2;
+            cond = 13;
+            break;
+        default:
+            assert(0);
+            break;
         }
         vpush_global_sym(&func_old_type, func);
         vrott(3);
@@ -1594,8 +1755,9 @@ ST_FUNC void gen_opf(int op)
         vtop->r = cond < 0 ? REG_FRET : REG_IRET;
         if (cond < 0)
             vtop->type = type;
-        else {
-            o(0x7100001f); // cmp w0,#0
+        else
+        {
+            o(0x7100001f);                        // cmp w0,#0
             o(0x1a9f07e0 | (uint32_t)cond << 12); // cset w0,(cond)
         }
         return;
@@ -1607,9 +1769,14 @@ ST_FUNC void gen_opf(int op)
     a = fltr(vtop[-1].r);
     b = fltr(vtop[0].r);
     vtop -= 2;
-    switch (op) {
-    case TOK_EQ: case TOK_NE:
-    case TOK_LT: case TOK_GE: case TOK_LE: case TOK_GT:
+    switch (op)
+    {
+    case TOK_EQ:
+    case TOK_NE:
+    case TOK_LT:
+    case TOK_GE:
+    case TOK_LE:
+    case TOK_GT:
         x = get_reg(RC_INT);
         ++vtop;
         vtop[0].r = x;
@@ -1623,7 +1790,8 @@ ST_FUNC void gen_opf(int op)
         break;
     }
 
-    switch (op) {
+    switch (op)
+    {
     case '*':
         o(0x1e200800 | dbl << 22 | x | a << 5 | b << 16); // fmul
         break;
@@ -1638,27 +1806,27 @@ ST_FUNC void gen_opf(int op)
         break;
     case TOK_EQ:
         o(0x1e202000 | dbl << 22 | a << 5 | b << 16); // fcmp
-        o(0x1a9f17e0 | x); // cset w(x),eq
+        o(0x1a9f17e0 | x);                            // cset w(x),eq
         break;
     case TOK_GE:
         o(0x1e202000 | dbl << 22 | a << 5 | b << 16); // fcmp
-        o(0x1a9fb7e0 | x); // cset w(x),ge
+        o(0x1a9fb7e0 | x);                            // cset w(x),ge
         break;
     case TOK_GT:
         o(0x1e202000 | dbl << 22 | a << 5 | b << 16); // fcmp
-        o(0x1a9fd7e0 | x); // cset w(x),gt
+        o(0x1a9fd7e0 | x);                            // cset w(x),gt
         break;
     case TOK_LE:
         o(0x1e202000 | dbl << 22 | a << 5 | b << 16); // fcmp
-        o(0x1a9f87e0 | x); // cset w(x),ls
+        o(0x1a9f87e0 | x);                            // cset w(x),ls
         break;
     case TOK_LT:
         o(0x1e202000 | dbl << 22 | a << 5 | b << 16); // fcmp
-        o(0x1a9f57e0 | x); // cset w(x),mi
+        o(0x1a9f57e0 | x);                            // cset w(x),mi
         break;
     case TOK_NE:
         o(0x1e202000 | dbl << 22 | a << 5 | b << 16); // fcmp
-        o(0x1a9f07e0 | x); // cset w(x),ne
+        o(0x1a9f07e0 | x);                            // cset w(x),ne
         break;
     default:
         assert(0);
@@ -1674,11 +1842,10 @@ ST_FUNC void gen_cvt_sxtw(void)
 
 ST_FUNC void gen_cvt_itof(int t)
 {
-    if (t == VT_LDOUBLE) {
+    if (t == VT_LDOUBLE)
+    {
         int f = vtop->type.t;
-        int func = (f & VT_BTYPE) == VT_LLONG ?
-          (f & VT_UNSIGNED ? TOK___floatunditf : TOK___floatditf) :
-          (f & VT_UNSIGNED ? TOK___floatunsitf : TOK___floatsitf);
+        int func = (f & VT_BTYPE) == VT_LLONG ? (f & VT_UNSIGNED ? TOK___floatunditf : TOK___floatditf) : (f & VT_UNSIGNED ? TOK___floatunsitf : TOK___floatsitf);
         vpush_global_sym(&func_old_type, func);
         vrott(2);
         gfunc_call(1);
@@ -1687,7 +1854,8 @@ ST_FUNC void gen_cvt_itof(int t)
         vtop->r = REG_FRET;
         return;
     }
-    else {
+    else
+    {
         int d, n = intr(gv(RC_INT));
         int s = !(vtop->type.t & VT_UNSIGNED);
         uint32_t l = ((vtop->type.t & VT_BTYPE) == VT_LLONG);
@@ -1703,10 +1871,9 @@ ST_FUNC void gen_cvt_itof(int t)
 
 ST_FUNC void gen_cvt_ftoi(int t)
 {
-    if ((vtop->type.t & VT_BTYPE) == VT_LDOUBLE) {
-        int func = (t & VT_BTYPE) == VT_LLONG ?
-          (t & VT_UNSIGNED ? TOK___fixunstfdi : TOK___fixtfdi) :
-          (t & VT_UNSIGNED ? TOK___fixunstfsi : TOK___fixtfsi);
+    if ((vtop->type.t & VT_BTYPE) == VT_LDOUBLE)
+    {
+        int func = (t & VT_BTYPE) == VT_LLONG ? (t & VT_UNSIGNED ? TOK___fixunstfdi : TOK___fixtfdi) : (t & VT_UNSIGNED ? TOK___fixunstfsi : TOK___fixtfsi);
         vpush_global_sym(&func_old_type, func);
         vrott(2);
         gfunc_call(1);
@@ -1715,7 +1882,8 @@ ST_FUNC void gen_cvt_ftoi(int t)
         vtop->r = REG_IRET;
         return;
     }
-    else {
+    else
+    {
         int d, n = fltr(gv(RC_FLOAT));
         uint32_t l = ((vtop->type.t & VT_BTYPE) != VT_FLOAT);
         --vtop;
@@ -1723,7 +1891,7 @@ ST_FUNC void gen_cvt_ftoi(int t)
         ++vtop;
         vtop[0].r = d;
         o(0x1e380000 |
-          (uint32_t)!!(t & VT_UNSIGNED) << 16 |
+          (uint32_t) !!(t & VT_UNSIGNED) << 16 |
           (uint32_t)((t & VT_BTYPE) == VT_LLONG) << 31 | intr(d) |
           l << 22 | n << 5); // fcvtz[su] [wx](d),[sd](n)
     }
@@ -1737,10 +1905,9 @@ ST_FUNC void gen_cvt_ftof(int t)
     if (t == f)
         return;
 
-    if (t == VT_LDOUBLE || f == VT_LDOUBLE) {
-        int func = (t == VT_LDOUBLE) ?
-            (f == VT_FLOAT ? TOK___extendsftf2 : TOK___extenddftf2) :
-            (t == VT_FLOAT ? TOK___trunctfsf2 : TOK___trunctfdf2);
+    if (t == VT_LDOUBLE || f == VT_LDOUBLE)
+    {
+        int func = (t == VT_LDOUBLE) ? (f == VT_FLOAT ? TOK___extendsftf2 : TOK___extenddftf2) : (t == VT_FLOAT ? TOK___trunctfsf2 : TOK___trunctfdf2);
         vpush_global_sym(&func_old_type, func);
         vrott(2);
         gfunc_call(1);
@@ -1748,7 +1915,8 @@ ST_FUNC void gen_cvt_ftof(int t)
         vtop->type.t = t;
         vtop->r = REG_FRET;
     }
-    else {
+    else
+    {
         int x, a;
         gv(RC_FLOAT);
         assert(vtop[0].r < VT_CONST);
@@ -1789,42 +1957,46 @@ ST_FUNC void gen_clear_cache(void)
     p = intr(vtop[0].r);    // x4
     vtop -= 5;
 
-    o(0xd53b0020 | isz); // mrs x(isz),ctr_el0
-    o(0x52800080 | p); // mov w(p),#4
-    o(0x53104c00 | dsz | isz << 5); // ubfx w(dsz),w(isz),#16,#4
+    o(0xd53b0020 | isz);                      // mrs x(isz),ctr_el0
+    o(0x52800080 | p);                        // mov w(p),#4
+    o(0x53104c00 | dsz | isz << 5);           // ubfx w(dsz),w(isz),#16,#4
     o(0x1ac02000 | dsz | p << 5 | dsz << 16); // lsl w(dsz),w(p),w(dsz)
-    o(0x12000c00 | isz | isz << 5); // and w(isz),w(isz),#15
+    o(0x12000c00 | isz | isz << 5);           // and w(isz),w(isz),#15
     o(0x1ac02000 | isz | p << 5 | isz << 16); // lsl w(isz),w(p),w(isz)
-    o(0x51000400 | p | dsz << 5); // sub w(p),w(dsz),#1
-    o(0x8a240004 | p | beg << 5 | p << 16); // bic x(p),x(beg),x(p)
-    b1 = ind; o(0x14000000); // b
+    o(0x51000400 | p | dsz << 5);             // sub w(p),w(dsz),#1
+    o(0x8a240004 | p | beg << 5 | p << 16);   // bic x(p),x(beg),x(p)
+    b1 = ind;
+    o(0x14000000); // b
     lab1 = ind;
-    o(0xd50b7b20 | p); // dc cvau,x(p)
+    o(0xd50b7b20 | p);                      // dc cvau,x(p)
     o(0x8b000000 | p | p << 5 | dsz << 16); // add x(p),x(p),x(dsz)
     write32le(cur_text_section->data + b1, 0x14000000 | (ind - b1) >> 2);
-    o(0xeb00001f | p << 5 | end << 16); // cmp x(p),x(end)
+    o(0xeb00001f | p << 5 | end << 16);             // cmp x(p),x(end)
     o(0x54ffffa3 | ((lab1 - ind) << 3 & 0xffffe0)); // b.cc lab1
-    o(0xd5033b9f); // dsb ish
-    o(0x51000400 | p | isz << 5); // sub w(p),w(isz),#1
-    o(0x8a240004 | p | beg << 5 | p << 16); // bic x(p),x(beg),x(p)
-    b1 = ind; o(0x14000000); // b
+    o(0xd5033b9f);                                  // dsb ish
+    o(0x51000400 | p | isz << 5);                   // sub w(p),w(isz),#1
+    o(0x8a240004 | p | beg << 5 | p << 16);         // bic x(p),x(beg),x(p)
+    b1 = ind;
+    o(0x14000000); // b
     lab1 = ind;
-    o(0xd50b7520 | p); // ic ivau,x(p)
+    o(0xd50b7520 | p);                      // ic ivau,x(p)
     o(0x8b000000 | p | p << 5 | isz << 16); // add x(p),x(p),x(isz)
     write32le(cur_text_section->data + b1, 0x14000000 | (ind - b1) >> 2);
-    o(0xeb00001f | p << 5 | end << 16); // cmp x(p),x(end)
+    o(0xeb00001f | p << 5 | end << 16);             // cmp x(p),x(end)
     o(0x54ffffa3 | ((lab1 - ind) << 3 & 0xffffe0)); // b.cc lab1
-    o(0xd5033b9f); // dsb ish
-    o(0xd5033fdf); // isb
+    o(0xd5033b9f);                                  // dsb ish
+    o(0xd5033fdf);                                  // isb
 }
 
-ST_FUNC void gen_vla_sp_save(int addr) {
+ST_FUNC void gen_vla_sp_save(int addr)
+{
     uint32_t r = intr(get_reg(RC_INT));
     o(0x910003e0 | r); // mov x(r),sp
     arm64_strx(3, r, 29, addr);
 }
 
-ST_FUNC void gen_vla_sp_restore(int addr) {
+ST_FUNC void gen_vla_sp_restore(int addr)
+{
     // Use x30 because this function can be called when there
     // is a live return value in x0 but there is nothing on
     // the value stack to prevent get_reg from returning x0.
@@ -1833,11 +2005,12 @@ ST_FUNC void gen_vla_sp_restore(int addr) {
     o(0x9100001f | r << 5); // mov sp,x(r)
 }
 
-ST_FUNC void gen_vla_alloc(CType *type, int align) {
+ST_FUNC void gen_vla_alloc(CType *type, int align)
+{
     uint32_t r = intr(gv(RC_INT));
     o(0x91003c00 | r | r << 5); // add x(r),x(r),#15
     o(0x927cec00 | r | r << 5); // bic x(r),x(r),#15
-    o(0xcb2063ff | r << 16); // sub sp,sp,x(r)
+    o(0xcb2063ff | r << 16);    // sub sp,sp,x(r)
     vpop();
 }
 

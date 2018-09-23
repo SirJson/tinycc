@@ -9,22 +9,15 @@ T = $(or $(CROSS_TARGET),$(NATIVE_TARGET),unknown)
 X = $(if $(CROSS_TARGET),$(CROSS_TARGET)-)
 BIN = $(TOP)/$(X)libtcc1.a
 
-XTCC ?= $(TOP)/$(X)tcc$(EXESUF)
-XCC = $(XTCC)
-XAR = $(XTCC) -ar
-XFLAGS-unx = -B$(TOPSRC)
+XCC = $(CC)
+XAR = $(AR)
+XFLAGS = $(CFLAGS) -fPIC
 XFLAGS-win = -B$(TOPSRC)/win32 -I$(TOPSRC)/include
 XFLAGS = $(XFLAGS$(XCFG))
 XCFG = $(or $(findstring -win,$T),-unx)
 
 # in order to use gcc, tyoe: make <target>-libtcc1-usegcc=yes
 arm-libtcc1-usegcc ?= no
-
-ifeq "$($(T)-libtcc1-usegcc)" "yes"
- XCC = $(CC)
- XAR = $(AR)
- XFLAGS = $(CFLAGS) -fPIC
-endif
 
 # only for native compiler
 $(X)BCHECK_O = bcheck.o

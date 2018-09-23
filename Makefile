@@ -3,6 +3,8 @@
 # Tiny C Compiler Makefile
 #
 
+#TODO: Clean all cross targets left overs. Also in the lib folder.
+
 ifndef TOP
  TOP = .
  INCLUDED = no
@@ -52,12 +54,11 @@ else
 endif
 
 # run local version of tcc with local libraries and includes
-TCCFLAGS-unx = -B$(TOP) -I$(TOPSRC)/include -I$(TOPSRC) -I$(TOP)
-TCCFLAGS-win = -B$(TOPSRC)/win32 -I$(TOPSRC)/include -I$(TOPSRC) -I$(TOP) -L$(TOP)
-TCCFLAGS = $(TCCFLAGS$(CFGWIN))
-TCC = $(TOP)/tcc$(EXESUF) $(TCCFLAGS)
+LIBFLAGS-unx = -B$(TOP) -I$(TOPSRC)/include -I$(TOPSRC) -I$(TOP)
+LIBFLAGS-win = -B$(TOPSRC)/win32 -I$(TOPSRC)/include -I$(TOPSRC) -I$(TOP) -L$(TOP)
+LIBFLAGS = $(TCCFLAGS$(CFGWIN))
 ifdef CONFIG_OSX
- TCCFLAGS += -D_ANSI_SOURCE
+ LIBFLAGS += -D_ANSI_SOURCE
 endif
 
 CFLAGS_P = $(CFLAGS) -pg -static -DCONFIG_TCC_STATIC -DTCC_PROFILE
@@ -90,29 +91,9 @@ TCCDOCS = tcc.1 tcc-doc.html tcc-doc.info
 
 all: $(PROGS) $(TCCLIBS) $(TCCDOCS)
 
-# cross compiler targets to build
-TCC_X = i386 x86_64 i386-win32 x86_64-win32 x86_64-osx arm arm64 arm-wince c67
-# TCC_X += arm-fpa arm-fpa-ld arm-vfp arm-eabi
-
-# cross libtcc1.a targets to build
-LIBTCC1_X = i386 x86_64 i386-win32 x86_64-win32 x86_64-osx arm arm64 arm-wince
-
-PROGS_CROSS = $(foreach X,$(TCC_X),$X-tcc$(EXESUF))
-LIBTCC1_CROSS = $(foreach X,$(LIBTCC1_X),$X-libtcc1.a)
-
-# build cross compilers & libs
-cross: $(LIBTCC1_CROSS) $(PROGS_CROSS)
-
-# build specific cross compiler & lib
-cross-%: %-tcc$(EXESUF) %-libtcc1.a ;
-
 install: ; @$(MAKE) --no-print-directory install$(CFGWIN)
 install-strip: ; @$(MAKE) --no-print-directory install$(CFGWIN) CONFIG_strip=yes
 uninstall: ; @$(MAKE) --no-print-directory uninstall$(CFGWIN)
-
-ifdef CONFIG_cross
-all : cross
-endif
 
 # --------------------------------------------
 
@@ -166,6 +147,7 @@ arm_FILES = $(CORE_FILES) arm-gen.c arm-link.c arm-asm.c
 arm-wince_FILES = $(arm_FILES) tccpe.c
 arm64_FILES = $(CORE_FILES) arm64-gen.c arm64-link.c
 c67_FILES = $(CORE_FILES) c67-gen.c c67-link.c tcccoff.c
+# TODO: Here we add our q3vm files?
 
 # libtcc sources
 LIBTCC_SRC = $(filter-out tcc.c tcctools.c,$(filter %.c,$($T_FILES)))
@@ -193,17 +175,6 @@ $(X)tcc.o : tcctools.c
 tcc$(EXESUF): tcc.o $(LIBTCC)
 	$(CC) -o $@ $^ $(LIBS) $(LDFLAGS) $(LINK_LIBTCC)
 
-# Cross Tiny C Compilers
-%-tcc$(EXESUF): FORCE
-	@$(MAKE) --no-print-directory $@ CROSS_TARGET=$* ONE_SOURCE=$(or $(ONE_SOURCE),yes)
-
-$(CROSS_TARGET)-tcc$(EXESUF): $(TCC_FILES)
-	$(CC) -o $@ $^ $(LIBS) $(LDFLAGS)
-
-# profiling version
-tcc_p$(EXESUF): $($T_FILES)
-	$(CC) -o $@ $< $(DEFINES) $(CFLAGS_P) $(LIBS_P) $(LDFLAGS_P)
-
 # static libtcc library
 libtcc.a: $(LIBTCC_OBJ)
 	$(AR) rcs $@ $^
@@ -215,23 +186,9 @@ libtcc.so: $(LIBTCC_OBJ)
 libtcc.so: CFLAGS+=-fPIC
 libtcc.so: LDFLAGS+=-fPIC
 
-# windows dynamic libtcc library
-libtcc.dll : $(LIBTCC_OBJ)
-	$(CC) -shared -o $@ $^ $(LDFLAGS)
-libtcc.dll : DEFINES += -DLIBTCC_AS_DLL
-
-# import file for windows libtcc.dll
-libtcc.def : libtcc.dll tcc$(EXESUF)
-	$(XTCC) -impdef $< -o $@
-XTCC ?= ./tcc$(EXESUF)
-
 # TinyCC runtime libraries
 libtcc1.a : tcc$(EXESUF) FORCE
 	@$(MAKE) -C lib DEFINES='$(DEF-$T)'
-
-# Cross libtcc1.a
-%-libtcc1.a : %-tcc$(EXESUF) FORCE
-	@$(MAKE) -C lib DEFINES='$(DEF-$*)' CROSS_TARGET=$*
 
 .PRECIOUS: %-libtcc1.a
 FORCE:
@@ -343,14 +300,15 @@ config.mak:
 	$(if $(wildcard $@),,@echo "Please run ./configure." && exit 1)
 
 # run all tests
-test:
-	$(MAKE) -C tests
-# run test(s) from tests2 subdir (see make help)
-tests2.%:
-	$(MAKE) -C tests/tests2 $@
+# TODO: Rewrite tests?
+# test:
+# 	$(MAKE) -C tests
+# # run test(s) from tests2 subdir (see make help)
+# tests2.%:
+# 	$(MAKE) -C tests/tests2 $@
 
-testspp.%:
-	$(MAKE) -C tests/pp $@
+# testspp.%:
+# 	$(MAKE) -C tests/pp $@
 
 clean:
 	rm -f tcc$(EXESUF) tcc_p$(EXESUF) *-tcc$(EXESUF) tcc.pod
@@ -361,21 +319,15 @@ clean:
 distclean: clean
 	rm -f config.h config.mak config.texi tcc.1 tcc-doc.info tcc-doc.html
 
-.PHONY: all clean test tar tags ETAGS distclean install uninstall FORCE
+.PHONY: all clean tar tags ETAGS distclean install uninstall FORCE
 
 help:
 	@echo "make"
 	@echo "   build native compiler (from separate objects)"
 	@echo ""
-	@echo "make cross"
-	@echo "   build cross compilers (from one source)"
 	@echo ""
 	@echo "make ONE_SOURCE=yes / no"
 	@echo "   force building from one source / separate objects"
-	@echo ""
-	@echo "make cross-TARGET"
-	@echo "   build one specific cross compiler for 'TARGET', as in"
-	@echo "   $(TCC_X)"
 	@echo ""
 	@echo "Custom configuration:"
 	@echo "   The makefile includes a file 'config-extra.mak' if it is present."
@@ -392,13 +344,6 @@ help:
 	@echo "      INC-i386  = {B}/lib/include:{B}/i386-linux/usr/include"
 	@echo "      DEF-i386  += -D__linux__"
 	@echo ""
-	@echo "make test"
-	@echo "   run all tests"
-	@echo ""
-	@echo "make tests2.all / make tests2.37 / make tests2.37+"
-	@echo "   run all/single test(s) from tests2, optionally update .expect"
-	@echo "make testspp.all / make testspp.17"
-	@echo "   run all/single test(s) from tests/pp"
 	@echo ""
 	@echo "Other supported make targets:"
 	@echo "   install install-strip tags ETAGS tar clean distclean help"

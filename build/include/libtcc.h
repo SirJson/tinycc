@@ -64,7 +64,6 @@ extern "C"
 #define TCC_OUTPUT_DLL 3        /* dynamic library */
 #define TCC_OUTPUT_OBJ 4        /* object file */
 #define TCC_OUTPUT_PREPROCESS 5 /* only preprocess (used internally) */
-#define TCC_OUTPUT_BYTECODE 6   /* output will be run by some kind of VM */
 
     /* equivalent to -Lpath option */
     LIBTCCAPI int tcc_add_library_path(TCCState *s, const char *pathname);

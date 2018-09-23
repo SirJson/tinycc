@@ -21,23 +21,24 @@
 #error this code has bit-rotted since 2003
 
 /* number of available registers */
-#define NB_REGS             3
+#define NB_REGS 3
 
 /* a register can belong to several classes. The classes must be
    sorted from more general to more precise (see gv2() code which does
    assumptions on it). */
-#define RC_ST      0x0001  /* any stack entry */
-#define RC_ST0     0x0002  /* top of stack */
-#define RC_ST1     0x0004  /* top - 1 */
+#define RC_ST 0x0001  /* any stack entry */
+#define RC_ST0 0x0002 /* top of stack */
+#define RC_ST1 0x0004 /* top - 1 */
 
-#define RC_INT     RC_ST
-#define RC_FLOAT   RC_ST
-#define RC_IRET    RC_ST0 /* function return: integer register */
-#define RC_LRET    RC_ST0 /* function return: second integer register */
-#define RC_FRET    RC_ST0 /* function return: float register */
+#define RC_INT RC_ST
+#define RC_FLOAT RC_ST
+#define RC_IRET RC_ST0 /* function return: integer register */
+#define RC_LRET RC_ST0 /* function return: second integer register */
+#define RC_FRET RC_ST0 /* function return: float register */
 
 /* pretty names for the registers */
-enum {
+enum
+{
     REG_ST0 = 0,
     REG_ST1,
     REG_ST2,
@@ -65,11 +66,12 @@ const int reg_classes[NB_REGS] = {
 #define PTR_SIZE 4
 
 /* long double size and alignment, in bytes */
-#define LDOUBLE_SIZE  8
+#define LDOUBLE_SIZE 8
 #define LDOUBLE_ALIGN 8
 
 /* function call context */
-typedef struct GFuncContext {
+typedef struct GFuncContext
+{
     int func_call; /* func call type (FUNC_STDCALL or FUNC_CDECL) */
 } GFuncContext;
 
@@ -78,8 +80,9 @@ typedef struct GFuncContext {
 
 #define IL_OP_PREFIX 0xFE
 
-enum ILOPCodes {
-#define OP(name, str, n) IL_OP_ ## name = n,
+enum ILOPCodes
+{
+#define OP(name, str, n) IL_OP_##name = n,
 #include "il-opcodes.h"
 #undef OP
 };
@@ -112,9 +115,10 @@ static void out_le32(int c)
 
 static void init_outfile(void)
 {
-    if (!il_outfile) {
+    if (!il_outfile)
+    {
         il_outfile = stdout;
-        fprintf(il_outfile, 
+        fprintf(il_outfile,
                 ".assembly extern mscorlib\n"
                 "{\n"
                 ".ver 1:0:2411:0\n"
@@ -151,7 +155,7 @@ static void out_opi(int op, int c)
 }
 
 /* XXX: not complete */
-static void il_type_to_str(char *buf, int buf_size, 
+static void il_type_to_str(char *buf, int buf_size,
                            int t, const char *varstr)
 {
     int bt;
@@ -164,7 +168,8 @@ static void il_type_to_str(char *buf, int buf_size,
     buf[0] = '\0';
     if (t & VT_UNSIGNED)
         pstrcat(buf, buf_size, "unsigned ");
-    switch(bt) {
+    switch (bt)
+    {
     case VT_VOID:
         tstr = "void";
         goto add_tstr;
@@ -202,7 +207,8 @@ static void il_type_to_str(char *buf, int buf_size,
         il_type_to_str(buf, buf_size, s->t, varstr);
         pstrcat(buf, buf_size, "(");
         sa = s->next;
-        while (sa != NULL) {
+        while (sa != NULL)
+        {
             il_type_to_str(buf1, sizeof(buf1), sa->t, NULL);
             pstrcat(buf, buf_size, buf1);
             sa = sa->next;
@@ -219,13 +225,13 @@ static void il_type_to_str(char *buf, int buf_size,
         il_type_to_str(buf, buf_size, s->t, buf1);
         goto no_var;
     }
-    if (varstr) {
+    if (varstr)
+    {
         pstrcat(buf, buf_size, " ");
         pstrcat(buf, buf_size, varstr);
     }
- no_var: ;
+no_var:;
 }
-
 
 /* patch relocation entry with value 'val' */
 void greloc_patch1(Reloc *p, int val)
@@ -242,7 +248,8 @@ static int out_opj(int op, int c)
 {
     out_op1(op);
     out_le32(0);
-    if (c == 0) {
+    if (c == 0)
+    {
         c = ind - (int)cur_text_section->data;
     }
     fprintf(il_outfile, " %s L%d\n", il_opcodes_str[op], c);
@@ -263,37 +270,62 @@ void load(int r, SValue *sv)
     fc = sv->c.i;
     ft = sv->t;
 
-    if (sv->r & VT_LVAL) {
-        if (v == VT_LOCAL) {
-            if (fc >= ARG_BASE) {
+    if (sv->r & VT_LVAL)
+    {
+        if (v == VT_LOCAL)
+        {
+            if (fc >= ARG_BASE)
+            {
                 fc -= ARG_BASE;
-                if (fc >= 0 && fc <= 4) {
+                if (fc >= 0 && fc <= 4)
+                {
                     out_op(IL_OP_LDARG_0 + fc);
-                } else if (fc <= 0xff) {
+                }
+                else if (fc <= 0xff)
+                {
                     out_opb(IL_OP_LDARG_S, fc);
-                } else {
+                }
+                else
+                {
                     out_opi(IL_OP_LDARG, fc);
                 }
-            } else {
-                if (fc >= 0 && fc <= 4) {
+            }
+            else
+            {
+                if (fc >= 0 && fc <= 4)
+                {
                     out_op(IL_OP_LDLOC_0 + fc);
-                } else if (fc <= 0xff) {
+                }
+                else if (fc <= 0xff)
+                {
                     out_opb(IL_OP_LDLOC_S, fc);
-                } else {
+                }
+                else
+                {
                     out_opi(IL_OP_LDLOC, fc);
                 }
             }
-        } else if (v == VT_CONST) {
-                /* XXX: handle globals */
-                out_opi(IL_OP_LDSFLD, 0);
-        } else {
-            if ((ft & VT_BTYPE) == VT_FLOAT) {
+        }
+        else if (v == VT_CONST)
+        {
+            /* XXX: handle globals */
+            out_opi(IL_OP_LDSFLD, 0);
+        }
+        else
+        {
+            if ((ft & VT_BTYPE) == VT_FLOAT)
+            {
                 out_op(IL_OP_LDIND_R4);
-            } else if ((ft & VT_BTYPE) == VT_DOUBLE) {
+            }
+            else if ((ft & VT_BTYPE) == VT_DOUBLE)
+            {
                 out_op(IL_OP_LDIND_R8);
-            } else if ((ft & VT_BTYPE) == VT_LDOUBLE) {
+            }
+            else if ((ft & VT_BTYPE) == VT_LDOUBLE)
+            {
                 out_op(IL_OP_LDIND_R8);
-            } else if ((ft & VT_TYPE) == VT_BYTE)
+            }
+            else if ((ft & VT_TYPE) == VT_BYTE)
                 out_op(IL_OP_LDIND_I1);
             else if ((ft & VT_TYPE) == (VT_BYTE | VT_UNSIGNED))
                 out_op(IL_OP_LDIND_U1);
@@ -303,31 +335,50 @@ void load(int r, SValue *sv)
                 out_op(IL_OP_LDIND_U2);
             else
                 out_op(IL_OP_LDIND_I4);
-        } 
-    } else {
-        if (v == VT_CONST) {
+        }
+    }
+    else
+    {
+        if (v == VT_CONST)
+        {
             /* XXX: handle globals */
-            if (fc >= -1 && fc <= 8) {
-                out_op(IL_OP_LDC_I4_M1 + fc + 1); 
-            } else {
+            if (fc >= -1 && fc <= 8)
+            {
+                out_op(IL_OP_LDC_I4_M1 + fc + 1);
+            }
+            else
+            {
                 out_opi(IL_OP_LDC_I4, fc);
             }
-        } else if (v == VT_LOCAL) {
-            if (fc >= ARG_BASE) {
+        }
+        else if (v == VT_LOCAL)
+        {
+            if (fc >= ARG_BASE)
+            {
                 fc -= ARG_BASE;
-                if (fc <= 0xff) {
+                if (fc <= 0xff)
+                {
                     out_opb(IL_OP_LDARGA_S, fc);
-                } else {
+                }
+                else
+                {
                     out_opi(IL_OP_LDARGA, fc);
                 }
-            } else {
-                if (fc <= 0xff) {
+            }
+            else
+            {
+                if (fc <= 0xff)
+                {
                     out_opb(IL_OP_LDLOCA_S, fc);
-                } else {
+                }
+                else
+                {
                     out_opi(IL_OP_LDLOCA, fc);
                 }
             }
-        } else {
+        }
+        else
+        {
             /* XXX: do it */
         }
     }
@@ -341,28 +392,44 @@ void store(int r, SValue *sv)
     v = sv->r & VT_VALMASK;
     fc = sv->c.i;
     ft = sv->t;
-    if (v == VT_LOCAL) {
-        if (fc >= ARG_BASE) {
+    if (v == VT_LOCAL)
+    {
+        if (fc >= ARG_BASE)
+        {
             fc -= ARG_BASE;
             /* XXX: check IL arg store semantics */
-            if (fc <= 0xff) {
+            if (fc <= 0xff)
+            {
                 out_opb(IL_OP_STARG_S, fc);
-            } else {
+            }
+            else
+            {
                 out_opi(IL_OP_STARG, fc);
             }
-        } else {
-            if (fc >= 0 && fc <= 4) {
+        }
+        else
+        {
+            if (fc >= 0 && fc <= 4)
+            {
                 out_op(IL_OP_STLOC_0 + fc);
-            } else if (fc <= 0xff) {
+            }
+            else if (fc <= 0xff)
+            {
                 out_opb(IL_OP_STLOC_S, fc);
-            } else {
+            }
+            else
+            {
                 out_opi(IL_OP_STLOC, fc);
             }
         }
-    } else if (v == VT_CONST) {
+    }
+    else if (v == VT_CONST)
+    {
         /* XXX: handle globals */
         out_opi(IL_OP_STSFLD, 0);
-    } else {
+    }
+    else
+    {
         if ((ft & VT_BTYPE) == VT_FLOAT)
             out_op(IL_OP_STIND_R4);
         else if ((ft & VT_BTYPE) == VT_DOUBLE)
@@ -388,9 +455,12 @@ void gfunc_start(GFuncContext *c, int func_call)
    is then popped. */
 void gfunc_param(GFuncContext *c)
 {
-    if ((vtop->t & VT_BTYPE) == VT_STRUCT) {
+    if ((vtop->t & VT_BTYPE) == VT_STRUCT)
+    {
         tcc_error("structures passed as value not handled yet");
-    } else {
+    }
+    else
+    {
         /* simply push on stack */
         gv(RC_ST0);
     }
@@ -403,11 +473,14 @@ void gfunc_call(GFuncContext *c)
 {
     char buf[1024];
 
-    if ((vtop->r & (VT_VALMASK | VT_LVAL)) == VT_CONST) {
+    if ((vtop->r & (VT_VALMASK | VT_LVAL)) == VT_CONST)
+    {
         /* XXX: more info needed from tcc */
         il_type_to_str(buf, sizeof(buf), vtop->t, "xxx");
         fprintf(il_outfile, " call %s\n", buf);
-    } else {
+    }
+    else
+    {
         /* indirect call */
         gv(RC_INT);
         il_type_to_str(buf, sizeof(buf), vtop->t, NULL);
@@ -432,10 +505,10 @@ void gfunc_prolog(int t)
     /* XXX: cannot do better now */
     fprintf(il_outfile, " .maxstack %d\n", NB_REGS);
     fprintf(il_outfile, " .locals (int32, int32, int32, int32, int32, int32, int32, int32)\n");
-    
+
     if (!strcmp(funcname, "main"))
         fprintf(il_outfile, " .entrypoint\n");
-        
+
     sym = sym_find((unsigned)t >> VT_STRUCT_SHIFT);
     func_call = sym->r;
 
@@ -444,12 +517,14 @@ void gfunc_prolog(int t)
        implicit pointer parameter */
     func_vt = sym->t;
     func_var = (sym->c == FUNC_ELLIPSIS);
-    if ((func_vt & VT_BTYPE) == VT_STRUCT) {
+    if ((func_vt & VT_BTYPE) == VT_STRUCT)
+    {
         func_vc = addr;
         addr++;
     }
     /* define parameters */
-    while ((sym = sym->next) != NULL) {
+    while ((sym = sym->next) != NULL)
+    {
         u = sym->t;
         sym_push(sym->v & ~SYM_FIELD, u,
                  VT_LOCAL | lvalue_type(sym->type.t), addr);
@@ -483,9 +558,11 @@ int gtst(int inv, int t)
     int v, *p, c;
 
     v = vtop->r & VT_VALMASK;
-    if (v == VT_CMP) {
+    if (v == VT_CMP)
+    {
         c = vtop->c.i ^ inv;
-        switch(c) {
+        switch (c)
+        {
         case TOK_EQ:
             c = IL_OP_BEQ;
             break;
@@ -518,16 +595,21 @@ int gtst(int inv, int t)
             break;
         }
         t = out_opj(c, t);
-    } else if (v == VT_JMP || v == VT_JMPI) {
+    }
+    else if (v == VT_JMP || v == VT_JMPI)
+    {
         /* && or || optimization */
-        if ((v & 1) == inv) {
+        if ((v & 1) == inv)
+        {
             /* insert vtop->c jump list in t */
             p = &vtop->c.i;
             while (*p != 0)
                 p = (int *)*p;
             *p = t;
             t = vtop->c.i;
-        } else {
+        }
+        else
+        {
             t = gjmp(t);
             gsym(vtop->c.i);
         }
@@ -540,7 +622,8 @@ int gtst(int inv, int t)
 void gen_opi(int op)
 {
     gv2(RC_ST1, RC_ST0);
-    switch(op) {
+    switch (op)
+    {
     case '+':
         out_op(IL_OP_ADD);
         goto std_op;
@@ -625,7 +708,8 @@ void gen_cvt_itof(int t)
 void gen_cvt_ftoi(int t)
 {
     gv(RC_ST0);
-    switch(t) {
+    switch (t)
+    {
     case VT_INT | VT_UNSIGNED:
         out_op(IL_OP_CONV_U4);
         break;
@@ -645,13 +729,15 @@ void gen_cvt_ftoi(int t)
 void gen_cvt_ftof(int t)
 {
     gv(RC_ST0);
-    if (t == VT_FLOAT) {
+    if (t == VT_FLOAT)
+    {
         out_op(IL_OP_CONV_R4);
-    } else {
+    }
+    else
+    {
         out_op(IL_OP_CONV_R8);
     }
 }
 
 /* end of CIL code generator */
 /*************************************************************/
-

@@ -6,11 +6,7 @@
         {
             "label": "make",
             "type": "shell",
-            "command": "make -j8; make install",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "command": "make ONE_SOURCE=yes -j8; make install"
             "problemMatcher": []
         },
         {
@@ -22,7 +18,17 @@
         {
             "label": "configure",
             "type": "shell",
-            "command": "./configure --prefix=${workspaceFolder}/build --config-musl",
+            "command": "./configure --prefix=${workspaceFolder}/build --config-musl --enable-static",
+            "problemMatcher": []
+        },
+        {
+            "label": "all",
+            "type": "shell",
+            "command": "./configure --prefix=${workspaceFolder}/build --config-musl --enable-static; make clean; make ONE_SOURCE=yes -j8; make install",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "problemMatcher": []
         }
     ]
